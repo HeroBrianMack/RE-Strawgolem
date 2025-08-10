@@ -6,14 +6,16 @@ import org.hero.strawgolem.golem.StrawGolem;
 import software.bernie.geckolib.model.GeoModel;
 
 public class GolemModel extends GeoModel<StrawGolem> {
-    private static final ResourceLocation model = ResourceLocation.tryBuild(Constants.MOD_ID, "geo/strawgolem.geo.json");
-    private static final ResourceLocation animation = ResourceLocation.tryBuild(Constants.MOD_ID, "animations/strawgolem.animation.json");
+    private static final ResourceLocation model = ResourceLocation.tryBuild(Constants.MODID, "geo/strawgolem.geo.json");
+    private static final ResourceLocation animation = ResourceLocation.tryBuild(Constants.MODID, "animations/strawgolem.animation.json");
 
     private static final ResourceLocation[] textures = {
-            ResourceLocation.tryBuild(Constants.MOD_ID, "textures/strawgolem_golem.png"),
-            ResourceLocation.tryBuild(Constants.MOD_ID, "textures/strawgolem_golem_old.png"),
-            ResourceLocation.tryBuild(Constants.MOD_ID, "textures/strawgolem_golem_dying.png")
+            ResourceLocation.tryBuild(Constants.MODID, "textures/straw_golem.png"),
+            ResourceLocation.tryBuild(Constants.MODID, "textures/straw_golem_old.png"),
+            ResourceLocation.tryBuild(Constants.MODID, "textures/straw_golem_dying.png")
     };
+
+
     @Override
     public ResourceLocation getModelResource(StrawGolem strawGolem) {
         return model;
@@ -21,7 +23,7 @@ public class GolemModel extends GeoModel<StrawGolem> {
 
     @Override
     public ResourceLocation getTextureResource(StrawGolem strawGolem) {
-        return textures[strawGolem.golemStatus()];
+        return textures[strawGolem.healthStatus()];
     }
 
     @Override

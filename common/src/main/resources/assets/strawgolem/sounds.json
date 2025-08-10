@@ -33,7 +33,7 @@
       "strawgolem:strawgolem-death2"
     ]
   },
-  "golem_heal": {
+  "golem_happy": {
     "category": "neutral",
     "subtitle": "strawgolem.subtitle.golemHeal",
     "sounds": [

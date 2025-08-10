@@ -16,7 +16,10 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "org.hero.strawgolem.Strawgolem"
+      "org.hero.strawgolem.StrawFabric"
+    ],
+    "client": [
+      "org.hero.strawgolem.StrawFabricClient"
     ]
   },
   "mixins": [
@@ -27,7 +30,8 @@
     "fabricloader": ">=${fabric_loader_version}",
     "fabric-api": "*",
     "minecraft": "${minecraft_version}",
-    "java": ">=${java_version}"
+    "java": ">=${java_version}",
+    "geckolib": "*"
   },
   "suggests": {
     "another-mod": "*"
