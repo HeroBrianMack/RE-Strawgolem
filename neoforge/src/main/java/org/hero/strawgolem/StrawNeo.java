@@ -11,11 +11,10 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.registries.DeferredRegister;
-import org.hero.strawgolem.Constants;
 import org.hero.strawgolem.registry.EntityRegistry;
 
 @Mod(Constants.MODID)
-public final class ExampleModNeoForge {
+public final class StrawNeo {
     public static final DeferredRegister<SoundEvent> SOUND_EVENTS = DeferredRegister.create(Registries.SOUND_EVENT, Constants.MODID);
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(Registries.BLOCK, Constants.MODID);
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, Constants.MODID);
@@ -24,7 +23,7 @@ public final class ExampleModNeoForge {
     public static final DeferredRegister<ArmorMaterial> ARMOR_MATERIALS = DeferredRegister.create(Registries.ARMOR_MATERIAL, Constants.MODID);
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(Registries.ITEM, Constants.MODID);
 
-    public ExampleModNeoForge(IEventBus modEventBus) {
+    public StrawNeo(IEventBus modEventBus) {
         SOUND_EVENTS.register(modEventBus);
         BLOCKS.register(modEventBus);
         BLOCK_ENTITIES.register(modEventBus);

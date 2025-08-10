@@ -31,7 +31,7 @@ side = "BOTH"
 [[dependencies."${mod_id}"]]
 modId = "geckolib"
 type = "required" #mandatory Can be one of "required", "optional", "incompatible" or "discouraged"
-versionRange = "${minecraft_version_range}"
+versionRange = "*"
 ordering = "NONE"
 side = "BOTH"
 # Features are specific properties of the game environment, that you may want to declare you require. This example declares

@@ -1,6 +1,6 @@
 package org.hero.strawgolem.platform;
 
-import org.hero.strawgolem.ExampleModNeoForge;
+import org.hero.strawgolem.StrawNeo;
 import org.hero.strawgolem.platform.services.IPlatformHelper;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLLoader;
@@ -39,37 +39,37 @@ public class NeoForgePlatformHelper implements IPlatformHelper {
 
     @Override
     public <T extends BlockEntity> Supplier<BlockEntityType<T>> registerBlockEntity(String id, Supplier<BlockEntityType<T>> blockEntityType) {
-        return ExampleModNeoForge.BLOCK_ENTITIES.register(id, blockEntityType);
+        return StrawNeo.BLOCK_ENTITIES.register(id, blockEntityType);
     }
 
     @Override
     public <T extends Block> Supplier<T> registerBlock(String id, Supplier<T> block) {
-        return ExampleModNeoForge.BLOCKS.register(id, block);
+        return StrawNeo.BLOCKS.register(id, block);
     }
 
     @Override
     public <T extends Entity> Supplier<EntityType<T>> registerEntity(String id, Supplier<EntityType<T>> entity) {
-        return ExampleModNeoForge.ENTITIES.register(id, entity);
+        return StrawNeo.ENTITIES.register(id, entity);
     }
 
     @Override
     public <T extends ArmorMaterial> Holder<T> registerArmorMaterial(String id, Supplier<T> armorMaterial) {
-        return (Holder<T>)ExampleModNeoForge.ARMOR_MATERIALS.register(id, armorMaterial);
+        return (Holder<T>) StrawNeo.ARMOR_MATERIALS.register(id, armorMaterial);
     }
 
     @Override
     public <T extends Item> Supplier<T> registerItem(String id, Supplier<T> item) {
-        return ExampleModNeoForge.ITEMS.register(id, item);
+        return StrawNeo.ITEMS.register(id, item);
     }
 
     @Override
     public <T extends SoundEvent> Supplier<T> registerSound(String id, Supplier<T> sound) {
-        return ExampleModNeoForge.SOUND_EVENTS.register(id, sound);
+        return StrawNeo.SOUND_EVENTS.register(id, sound);
     }
 
     @Override
     public <T extends CreativeModeTab> Supplier<T> registerCreativeModeTab(String id, Supplier<T> tab) {
-        return ExampleModNeoForge.CREATIVE_TABS.register(id, tab);
+        return StrawNeo.CREATIVE_TABS.register(id, tab);
     }
 
     @Override

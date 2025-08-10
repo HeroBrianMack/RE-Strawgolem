@@ -4,14 +4,17 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.goal.MoveToBlockGoal;
 import net.minecraft.world.item.ItemNameBlockItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import org.hero.strawgolem.Constants;
@@ -24,11 +27,11 @@ import java.util.Collections;
 import java.util.Queue;
 
 public class GolemHarvestGoal extends MoveToBlockGoal {
-    StrawGolem golem;
-    Queue<BlockPos> queue;
-    int harvestTimer = 0;
-    ItemStack item;
-    BiPredicate predicate = (gol, pos) -> /*VisionHelper.canSee(gol, pos) && */isGrownPlant(gol.level(), pos) && ReachHelper.canPath(gol, pos);
+    private StrawGolem golem;
+    private Queue<BlockPos> queue;
+    private int harvestTimer = 0;
+    private ItemStack item;
+    private BiPredicate predicate = (gol, pos) -> /*VisionHelper.canSee(gol, pos) && */isGrownPlant(gol.level(), pos) && ReachHelper.canPath(gol, pos);
     public GolemHarvestGoal(StrawGolem golem) {
         super(golem, Constants.Golem.defaultWalkSpeed, Constants.Golem.searchRange, Constants.Golem.searchRangeVertical);
         this.golem = golem;
@@ -60,6 +63,7 @@ public class GolemHarvestGoal extends MoveToBlockGoal {
                 System.out.println("HARVEST!");
                 item = harvest();
                 golem.setItemSlot(EquipmentSlot.MAINHAND, item);
+                blockReset(golem.level());
             }
             if (harvestTimer == 38) {
                 System.out.println("QUEUE");
@@ -138,16 +142,30 @@ public class GolemHarvestGoal extends MoveToBlockGoal {
     public ItemStack harvest() {
         if (golem.level() instanceof ServerLevel level) {
             BlockState state = level.getBlockState(blockPos);
+
             LootParams.Builder builder = new LootParams.Builder(level).
                     withParameter(LootContextParams.TOOL, ItemStack.EMPTY).
                     withParameter(LootContextParams.ORIGIN, mob.position());
-            return state.getDrops(builder).stream().filter(this::isCropDrop).findFirst().orElse(ItemStack.EMPTY);
+            ItemStack drops =  state.getDrops(builder).stream().filter(this::isCropDrop).findFirst().orElse(ItemStack.EMPTY);
+            return drops;
         } else {
             Constants.LOG.error("Golem level not ServerLevel!!!");
             return ItemStack.EMPTY;
         }
     }
 
+    private void blockReset(Level level) {
+        BlockState state = level.getBlockState(blockPos);
+        for (Property<?> prop : state.getProperties()) {
+            // Let's assume age is not a weird property...
+            if (prop.getName().equalsIgnoreCase("age") && prop instanceof IntegerProperty intprop) {
+                int value = state.getBlock().defaultBlockState().getValue(intprop);
+                level.playSound(null, blockPos, state.getSoundType().getBreakSound(), SoundSource.BLOCKS);
+                state = state.setValue(intprop, value);
+                level.setBlockAndUpdate(blockPos, state);
+            }
+        }
+    }
     private boolean isCropDrop(ItemStack item) {
         return !(item.getItem() instanceof ItemNameBlockItem) || item.getItem().components().has(DataComponents.FOOD);
     }

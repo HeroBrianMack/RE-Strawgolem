@@ -73,6 +73,10 @@ dependencies {
     // Forge's hack fix
     implementation('net.sf.jopt-simple:jopt-simple:5.0.4') { version { strictly '5.0.4' } }
     implementation fg.deobf("software.bernie.geckolib:geckolib-forge-${minecraft_version}:${geckolib_version}")
+    compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:0.5.0"))
+    implementation(jarJar("io.github.llamalad7:mixinextras-forge:0.5.0")) {
+        jarJar.ranged(it, "[0.5.0,)")
+    }
 }
 
 publishing {

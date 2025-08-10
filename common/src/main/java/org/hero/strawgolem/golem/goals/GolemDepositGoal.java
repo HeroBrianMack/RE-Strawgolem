@@ -11,7 +11,7 @@ import org.hero.strawgolem.golem.api.ReachHelper;
 import org.hero.strawgolem.golem.api.VisionHelper;
 
 public class GolemDepositGoal extends MoveToBlockGoal {
-    StrawGolem golem;
+    private StrawGolem golem;
     public GolemDepositGoal(StrawGolem golem) {
         super(golem, Golem.defaultWalkSpeed, Golem.searchRange, Golem.searchRangeVertical);
         this.golem = golem;
