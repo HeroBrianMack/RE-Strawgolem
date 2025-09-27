@@ -9,6 +9,7 @@ import software.bernie.geckolib.animation.RawAnimation;
 public class GolemHarvestAnimationController extends AnimationController<StrawGolem> {
 
     private static final RawAnimation[] harvest = {
+            //test
             RawAnimation.begin().thenPlay("harvest_item"),
             RawAnimation.begin().thenPlay("harvest_block")
     };
