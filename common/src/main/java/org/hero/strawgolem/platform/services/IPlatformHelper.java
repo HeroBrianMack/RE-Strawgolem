@@ -13,6 +13,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 
+import java.nio.file.Path;
 import java.util.function.Supplier;
 
 public interface IPlatformHelper {
@@ -39,6 +40,7 @@ public interface IPlatformHelper {
      */
     boolean isDevelopmentEnvironment();
 
+    Path getConfigPath();
     /**
      * Gets the name of the environment type as a string.
      *

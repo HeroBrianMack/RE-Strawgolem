@@ -1,5 +1,6 @@
 package org.hero.strawgolem.platform;
 
+import net.neoforged.fml.loading.FMLPaths;
 import org.hero.strawgolem.StrawNeo;
 import org.hero.strawgolem.platform.services.IPlatformHelper;
 import net.neoforged.fml.ModList;
@@ -18,6 +19,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.neoforge.common.DeferredSpawnEggItem;
 
+import java.nio.file.Path;
 import java.util.function.Supplier;
 
 public class NeoForgePlatformHelper implements IPlatformHelper {
@@ -35,6 +37,11 @@ public class NeoForgePlatformHelper implements IPlatformHelper {
     @Override
     public boolean isDevelopmentEnvironment() {
         return !FMLLoader.isProduction();
+    }
+
+    @Override
+    public Path getConfigPath() {
+        return FMLPaths.CONFIGDIR.get();
     }
 
     @Override

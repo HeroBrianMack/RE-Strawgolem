@@ -42,6 +42,8 @@ import software.bernie.geckolib.util.RenderUtil;
 
 import java.util.Queue;
 
+import static org.hero.strawgolem.Constants.CONFIG;
+
 public class StrawGolem extends AbstractGolem implements GeoAnimatable {
     public StrawGolem(EntityType<? extends StrawGolem> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
