@@ -26,7 +26,7 @@ import org.hero.strawgolem.golem.api.VisionHelper;
 import java.util.Collections;
 import java.util.Queue;
 
-public class GolemHarvestGoal extends MoveToBlockGoal {
+public class GolemHarvestGoal extends GolemMoveToBlockGoal {
     private StrawGolem golem;
     private Queue<BlockPos> queue;
     private int harvestTimer = 0;
@@ -45,30 +45,42 @@ public class GolemHarvestGoal extends MoveToBlockGoal {
 
     @Override
     public void tick() {
-//        super.tick();
-//        if ()
-//        System.out.println(blockPos);
-//        if (golem.get)
-//        System.out.println(blockPos.distToCenterSqr(mob.position()) + " " + (mob.getNavigation().getPath() == null ? true : mob.getNavigation().getPath().getDistToTarget()));
-        if (ReachHelper.canReach(mob, blockPos) && item == null) {
-            // harvest time!
-            item = harvest();
-            golem.setPickupStatus(item);
-            golem.getNavigation().stop();
-        } else if (item != null && !item.isEmpty()) {
-            harvestTimer++;
-//            System.out.println(harvestTimer);
-            if (harvestTimer == 20 && predicate.filter(golem, blockPos) && ReachHelper.canReach(mob, blockPos)) {
-                // Double checking this, not going to let someone change a block
-//                System.out.println("HARVEST!");
+        try {
+            super.tick();
+    //        if ()
+    //        System.out.println(blockPos);
+    //        if (golem.get)
+            System.out.println("Harvest tick: " + mob.getId());
+    //        System.out.println(blockPos.distToCenterSqr(mob.position()) + " " + (mob.getNavigation().getPath() == null ? true : mob.getNavigation().getPath().getDistToTarget()));
+            if (ReachHelper.canReach(mob, blockPos) && item == null) {
+                // harvest time!
                 item = harvest();
-                golem.setItemSlot(EquipmentSlot.MAINHAND, item);
-                blockReset(golem.level());
+                golem.setPickupStatus(item);
+                golem.getNavigation().stop();
+            } else if (item != null && !item.isEmpty()) {
+                harvestTimer++;
+    //            System.out.println(harvestTimer);
+                // Another golem harvested block (TODO: Mark blocks with golem IDs to avoid this confusion + Smarter harvesting)
+                if (harvestTimer == 20 && predicate.filter(golem, blockPos) && ReachHelper.canReach(mob, blockPos)) {
+                    // Double checking this, not going to let someone change a block
+    //                System.out.println("HARVEST!");
+                    item = harvest();
+                    golem.setItemSlot(EquipmentSlot.MAINHAND, item);
+                    blockReset(golem.level());
+                } else if (harvestTimer == 40) {
+    //                System.out.println("QUEUE");
+                    golem.setPickupStatus(0);
+                } else if (harvestTimer < 20 && !predicate.filter(golem, blockPos)) {
+                    golem.forceAnimationReset();
+                    golem.setPickupStatus(0);
+                    item = null;
+                }
+            } else if (shouldRecalculatePath() && golemCollision(golem)) {
+                nudge(golem);
             }
-            if (harvestTimer == 38) {
-//                System.out.println("QUEUE");
-                golem.setPickupStatus(0);
-            }
+        } catch (Exception e) {
+            Constants.LOG.error(e.getMessage());
+            stop();
         }
 
 
@@ -84,6 +96,12 @@ public class GolemHarvestGoal extends MoveToBlockGoal {
         item = null;
 //        this.maxStayTicks = this.mob.getRandom().nextInt(this.mob.getRandom().nextInt(1200) + 1200) + 1200;
 //        this.mob.getNavigation().moveTo((double)this.blockPos.getX() + 0.5, (double)(this.blockPos.getY()), (double)this.blockPos.getZ() + 0.5, this.speedModifier);
+    }
+
+    @Override
+    public void stop() {
+//        golem.forceAnimationReset();
+        golem.setPickupStatus(0);
     }
 
     @Override
@@ -105,12 +123,12 @@ public class GolemHarvestGoal extends MoveToBlockGoal {
             blockPos = queue.poll();
         } while (!predicate.filter(golem, blockPos) && !queue.isEmpty());
 //        System.out.println(blockPos + "pos");
-        return golem.getMainHandItem().isEmpty() && blockPos != null;
+        return golem.getMainHandItem().isEmpty() && isValidTarget(golem.level(), blockPos);
     }
 
     @Override
     public boolean canContinueToUse() {
-        return (golem.getMainHandItem().isEmpty() ||  harvestTimer <= 40) && blockPos != null;
+        return harvestTimer <= 38 && (golem.getMainHandItem().isEmpty() ||  harvestTimer <= 40) && isValidTarget(golem.level(), blockPos);
     }
 
     private boolean isPlant(LevelReader levelReader, BlockPos blockPos) {
@@ -129,11 +147,17 @@ public class GolemHarvestGoal extends MoveToBlockGoal {
                     return true;
                 }
             }
-        } else if (state.getBlock() == Blocks.PUMPKIN || state.getBlock() == Blocks.MELON) {
-            // Just going to brute force this for now... don't care about efficiency
+        } else if (Constants.Golem.blockHarvest && state.getBlock()
+                == Blocks.PUMPKIN || state.getBlock() == Blocks.MELON) {
+            // Just going to brute force this for now... don't care about efficiency currently
             for (Direction dir : Direction.values()) {
-                if (levelReader.getBlockState(blockPos.relative(dir)).getBlock() instanceof AttachedStemBlock
-                        && blockPos.relative(dir).relative(state.getValue(AttachedStemBlock.FACING)).equals(blockPos)) return true;
+                if (levelReader.getBlockState(blockPos.relative(dir))
+                        .getBlock() instanceof AttachedStemBlock
+                        && blockPos.relative(dir)
+                        .relative(state.getValue(AttachedStemBlock.FACING))
+                        .equals(blockPos)) {
+                    return true;
+                }
             }
         }
         return false;
