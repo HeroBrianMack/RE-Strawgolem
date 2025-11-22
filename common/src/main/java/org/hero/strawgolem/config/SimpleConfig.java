@@ -41,9 +41,9 @@ public class SimpleConfig {
     private boolean broken = false;
 
     public interface DefaultConfig {
-        String get( String namespace );
+        String get();
 
-        static String empty( String namespace ) {
+        static String empty() {
             return "";
         }
     }
@@ -84,7 +84,7 @@ public class SimpleConfig {
         }
 
         private String getConfig() {
-            return provider.get( filename ) + "\n";
+            return provider.get() + "\n";
         }
 
     }
@@ -135,7 +135,6 @@ public class SimpleConfig {
     private SimpleConfig( ConfigRequest request ) {
         this.request = request;
         String identifier = "Config '" + request.filename + "'";
-
         if( !request.file.exists() ) {
             LOGGER.info( identifier + " is missing, generating default one..." );
 
@@ -143,6 +142,7 @@ public class SimpleConfig {
                 createConfig();
             } catch (IOException e) {
                 LOGGER.error( identifier + " failed to generate!" );
+                LOGGER.error(e.getMessage());
                 LOGGER.trace( e );
                 broken = true;
             }
@@ -154,6 +154,7 @@ public class SimpleConfig {
             } catch (Exception e) {
                 LOGGER.error( identifier + " failed to load!" );
                 LOGGER.trace( e );
+                LOGGER.error(e.getMessage());
                 broken = true;
             }
         }
@@ -167,7 +168,6 @@ public class SimpleConfig {
      * @return  value corresponding to the given key
      * @see     SimpleConfig#getOrDefault
      */
-    @Deprecated
     public String get( String key ) {
         return config.get( key );
     }
