@@ -22,7 +22,7 @@ public abstract class GolemMoveToBlockGoal extends MoveToBlockGoal {
     // Method to check if there is a collision between straw golems.
     protected boolean golemCollision(StrawGolem golem) {
         return !golem.level().getEntitiesOfClass(StrawGolem.class,
-                golem.getBoundingBox().inflate(0.4),
+                golem.getBoundingBox().inflate(0.3),
                 (gol) -> !gol.position().equals(golem.position())).isEmpty();
     }
 

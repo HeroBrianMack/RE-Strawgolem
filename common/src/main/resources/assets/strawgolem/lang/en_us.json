@@ -24,6 +24,7 @@
   "strawgolem.ordering.start": "Ordering golem",
   "strawgolem.ordering.stop": "No longer ordering golem",
   "strawgolem.ordering.complete": "Golem will now deliver to this container",
+  "strawgolem.ordering.failure": "Golem unable to be ordered",
   "strawgolem.barrel.health": "Barrel Durability: %d",
   "itemGroup.strawgolem.tab": "Straw Golem"
 }

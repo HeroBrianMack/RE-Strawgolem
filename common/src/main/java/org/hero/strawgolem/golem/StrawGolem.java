@@ -1,13 +1,12 @@
 package org.hero.strawgolem.golem;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.Mth;
 import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -33,6 +32,7 @@ import org.hero.strawgolem.golem.api.VisionHelper;
 import org.hero.strawgolem.golem.goals.GolemDepositGoal;
 import org.hero.strawgolem.golem.goals.GolemHarvestGoal;
 import org.hero.strawgolem.golem.goals.GolemWanderGoal;
+import org.hero.strawgolem.mixinInterfaces.GolemOrderer;
 import org.hero.strawgolem.registry.ItemRegistry;
 import org.hero.strawgolem.registry.SoundRegistry;
 import software.bernie.geckolib.animatable.GeoAnimatable;
@@ -60,6 +60,8 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
     private static final EntityDataAccessor<Integer> CARRY_STATUS = SynchedEntityData.defineId(StrawGolem.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> PICKUP_STATUS = SynchedEntityData.defineId(StrawGolem.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> BARREL = SynchedEntityData.defineId(StrawGolem.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<BlockPos> PRIORITY_POS = SynchedEntityData.defineId(StrawGolem.class, EntityDataSerializers.BLOCK_POS);
+
     private boolean forceAnimationReset = false;
     @Override
     protected void registerGoals() {
@@ -75,6 +77,7 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
         pBuilder.define(PICKUP_STATUS, 0);
         pBuilder.define(HAT, false);
         pBuilder.define(BARREL, 0);
+        pBuilder.define(PRIORITY_POS, new BlockPos(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE));
     }
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar registrar) {
@@ -129,6 +132,16 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
                 entityData.set(HAT, true);
             }
             return InteractionResult.CONSUME;
+        } else if (pHand == InteractionHand.MAIN_HAND
+                    && pPlayer.getMainHandItem().isEmpty() && pPlayer.isCrouching()
+                    && pPlayer instanceof GolemOrderer orderer) {
+            if (orderer.strawgolemRewrite$getGolem() == null || !orderer.strawgolemRewrite$getGolem().equals(this)) {
+                orderer.strawgolemRewrite$setGolem(this);
+                pPlayer.displayClientMessage(Component.translatable("strawgolem.ordering.start"), true);
+            } else {
+                orderer.strawgolemRewrite$setGolem(null);
+                pPlayer.displayClientMessage(Component.translatable("strawgolem.ordering.stop"), true);
+            }
         }
         return super.mobInteract(pPlayer, pHand);
     }
@@ -159,6 +172,7 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
         this.entityData.set(CARRY_STATUS, tag.getInt("carry"));
         // Barrel!
         this.entityData.set(BARREL, tag.getInt("barrelHP"));
+        this.entityData.set(PRIORITY_POS, BlockPos.of(tag.getLong("priorityPos")));
     }
 
     @Override
@@ -166,6 +180,7 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
         tag.putBoolean("hat", this.hasHat());
         tag.putInt("carry", carryStatus());
         tag.putInt("barrelHP", barrelHP());
+        tag.putLong("priorityPos", this.entityData.get(PRIORITY_POS).asLong());
 //        tag.putInt("barrelHealth", this.entityData.get(BARREL_HEALTH));
 //        tag.putBoolean("fixSpeed", fixSpeed);
         super.addAdditionalSaveData(tag);
@@ -258,6 +273,14 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
         return barrelHP() != 0;
     }
 
+    public void setPriorityPos(BlockPos pos) {
+        entityData.set(PRIORITY_POS, pos);
+    }
+
+    public BlockPos getPriorityPos() {
+        return entityData.get(PRIORITY_POS);
+    }
+
     public boolean shouldForceAnimationReset() {
         if (forceAnimationReset) {
             forceAnimationReset = false;
@@ -280,12 +303,17 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
     }
     public class Deliverer {
         BlockPos storagePos;
-        BlockPos playerStoragePos;
         public BlockPos getDeliverable() {
             StrawGolem golem = StrawGolem.this;
 //            BiPredicate<StrawGolem, BlockPos> = new BiPredicate<>((U, T) -> VisionHelper.canSee(U, T));
             BiPredicate predicate = (gol, pos) -> VisionHelper.canSee(gol, pos) && ContainerHelper.isContainer(gol, pos) && ReachHelper.canPath(gol, pos);
-            if (storagePos != null && predicate.filter(golem, storagePos)) return storagePos;
+            // Checking the player-bound position first.
+            if (getPriorityPos().getX() != Integer.MAX_VALUE && predicate.filter(golem, getPriorityPos())) {
+                return getPriorityPos();
+            }
+            if (storagePos != null && predicate.filter(golem, storagePos)) {
+                return storagePos;
+            }
             BlockPos pos = VisionHelper.findNearestBlock(golem, predicate);
             // Keep StoragePos as the saved one (may change this for only save the player-specified ones...)
             storagePos = storagePos == null || !predicate.filter(golem, storagePos) ? pos : storagePos;
