@@ -19,7 +19,6 @@ public class GolemHarvestAnimationController extends AnimationController<StrawGo
         AnimationController<StrawGolem> controller = event.getController();
         // if the golem is picking a block up
         int status = golem.pickupStatus();
-//        System.out.println("harvest animation: " + status);
         if (status != 0) {
             status--;
             // temporary no config options...
@@ -38,11 +37,7 @@ public class GolemHarvestAnimationController extends AnimationController<StrawGo
         super(animatable, "harvest_handler", Constants.Animation.TRANSITION_TIME, PREDICATE);
         // This will likely need changed, but for now it's fine...
         setCustomInstructionKeyframeHandler(event -> {
-            if (event.getKeyframeData().getInstructions().equals("completeHarvest")) {
-//                animatable.setPickupStatus(0);
-//                animatable.setPickupStatus();
-                System.out.println(animatable.level().isClientSide);
-            }
+            if (event.getKeyframeData().getInstructions().equals("completeHarvest")) {}
         });
     }
 }

@@ -23,8 +23,6 @@ public class GolemArmAnimationController extends AnimationController<StrawGolem>
         // if the golem is picking a block up
         if (golem.pickupStatus() != 0 || golem.shouldForceAnimationReset()) return PlayState.STOP;
         AnimationController<StrawGolem> controller = event.getController();
-//        System.out.println("arm animation: " + golem.carryStatus());
-
         if (controller.getAnimationState().equals(State.STOPPED)) {
             controller.forceAnimationReset();
         }

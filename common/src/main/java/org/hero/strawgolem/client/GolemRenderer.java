@@ -21,7 +21,6 @@ public class GolemRenderer extends DynamicGeoEntityRenderer<StrawGolem> {
 
     public GolemRenderer(EntityRendererProvider.Context renderManager) {
         super(renderManager, new GolemModel());
-//        System.out.println("HERORENDER");
         addRenderLayer(new BlockAndItemGeoLayer<>(this) {
             @Nullable
             @Override
