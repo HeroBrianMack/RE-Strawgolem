@@ -151,14 +151,19 @@ public class GolemHarvestGoal extends GolemMoveToBlockGoal {
         } else if (Constants.Golem.blockHarvest && state.getBlock()
                 == Blocks.PUMPKIN || state.getBlock() == Blocks.MELON) { // Pumpkins and Melons
             // Just going to brute force this for now... don't care about efficiency currently
-            for (Direction dir : Direction.values()) {
-                if (levelReader.getBlockState(blockPos.relative(dir))
-                        .getBlock() instanceof AttachedStemBlock
-                        && blockPos.relative(dir)
-                        .relative(state.getValue(AttachedStemBlock.FACING))
-                        .equals(blockPos)) {
-                    return true;
+            try {
+                for (Direction dir : Direction.values()) {
+                    if (levelReader.getBlockState(blockPos.relative(dir))
+                            .getBlock() instanceof AttachedStemBlock
+                            && state.hasProperty(AttachedStemBlock.FACING) && blockPos.relative(dir)
+                            .relative(state.getValue(AttachedStemBlock.FACING))
+                            .equals(blockPos)) {
+                        return true;
+                    }
                 }
+            } catch (Throwable e) {
+                Constants.LOG.error(e.getMessage());
+                return false;
             }
         }
         return false;
