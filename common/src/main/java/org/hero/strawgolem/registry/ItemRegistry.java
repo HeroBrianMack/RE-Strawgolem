@@ -25,11 +25,6 @@ public class ItemRegistry {
                                 output.accept(ItemRegistry.STRAW_HAT.get()))
                         .build()
         );
-        CreativeModeTabs.getDefaultTab().getDisplayItems().add(new ItemStack(STRAW_HAT.get()));
-        CreativeModeTabs.getDefaultTab().getSearchTabDisplayItems().add(new ItemStack(STRAW_HAT.get()));
-
-        Constants.LOG.error("BRUH {}", CreativeModeTabs.getDefaultTab().contains(new ItemStack(STRAW_HAT.get())));
-
     }
     public static final Supplier<Item> STRAW_HAT = registerItem("straw_hat", () -> new Item(new Item.Properties()
             .stacksTo(1)));
