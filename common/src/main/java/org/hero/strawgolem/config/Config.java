@@ -18,7 +18,7 @@ public class Config {
         file += "\n";
         section("Golem Health");
         add("Max Health", 6f, "The max health of a golem.");
-        add("Barrel Max Health", 100f, "The max health of a barrel.");
+        add("Barrel Max Health", 100, "The max health of a barrel.");
         section("Golem Movement");
         add("Walk Speed", 0.5,
                 "The walk speed of a golem.");

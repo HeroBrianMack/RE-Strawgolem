@@ -16,7 +16,7 @@ public class Constants {
     public static class Golem {
         // Health
         public static final float maxHealth = CONFIG.getFloat("Max Health");
-        public static final float barrelHealth = CONFIG.getFloat("Barrel Max Health");
+        public static final int barrelHealth = CONFIG.getInt("Barrel Max Health");
         // Movement
         public static final double defaultMovement = 0.23;
         public static final double defaultWalkSpeed = CONFIG.getDouble("Walk Speed");
@@ -29,7 +29,7 @@ public class Constants {
         public static final double depositDistance = 1.5;
         public static boolean blockHarvest = CONFIG.getBool("Block Harvesting");
         public static boolean whitelistHarvest = CONFIG.getBool("Use Whitelist");
-        public static String whitelist = CONFIG.getString("Block Harvesting");
+        public static String whitelist = CONFIG.getString("Crop Whitelist");
     }
 
     public static class Animation {

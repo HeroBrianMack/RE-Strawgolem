@@ -117,8 +117,8 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
         pPlayer.playSound(SoundRegistry.GOLEM_HAPPY.get());
         ItemStack item = pPlayer.getMainHandItem();
         if (pHand == InteractionHand.MAIN_HAND && item != ItemStack.EMPTY) {
-            if (item.is(Items.BARREL) && barrelHP() != 100) {
-                entityData.set(BARREL, 100);
+            if (item.is(Items.BARREL) && barrelHP() != Golem.barrelHealth) {
+                entityData.set(BARREL, Golem.barrelHealth);
                 item.shrink(1);
             } else if (item.is(Items.WHEAT) && healthStatus() != 0) {
                 if (getMaxHealth() - getHealth() < 3.0f) {
