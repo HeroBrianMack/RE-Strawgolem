@@ -94,6 +94,8 @@ public class GolemHarvestGoal extends GolemMoveToBlockGoal {
     @Override
     public void stop() {
         golem.setPickupStatus(0);
+        // ToDo: Look into a more gradual stop
+        golem.getNavigation().stop();
     }
 
     @Override
@@ -139,6 +141,9 @@ public class GolemHarvestGoal extends GolemMoveToBlockGoal {
     private boolean isGrownPlant(LevelReader levelReader, BlockPos blockPos) {
         if (levelReader == null || blockPos == null) return false;
         BlockState state = levelReader.getBlockState(blockPos);
+        if (Constants.Golem.whitelistHarvest && !Constants.Golem.whitelist.contains(state.getBlock())) {
+            return false;
+        }
         if (state.getBlock() instanceof CropBlock crop) {
             return crop.isMaxAge(state);
         } else if (state.getBlock() instanceof BushBlock bush) {
@@ -178,7 +183,7 @@ public class GolemHarvestGoal extends GolemMoveToBlockGoal {
             LootParams.Builder builder = new LootParams.Builder(level).
                     withParameter(LootContextParams.TOOL, ItemStack.EMPTY).
                     withParameter(LootContextParams.ORIGIN, mob.position());
-            ItemStack drops =  state.getDrops(builder).stream().filter(this::isCropDrop).findFirst()
+            ItemStack drops = state.getDrops(builder).stream().filter(this::isCropDrop).findFirst()
                     .orElse(state.getDrops(builder).stream().findFirst().orElse(ItemStack.EMPTY));
             return drops;
         } else {

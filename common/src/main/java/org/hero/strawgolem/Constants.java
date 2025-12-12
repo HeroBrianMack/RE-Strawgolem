@@ -1,11 +1,18 @@
 package org.hero.strawgolem;
 
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import org.hero.strawgolem.config.Config;
 import org.hero.strawgolem.platform.services.IPlatformHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.ServiceLoader;
+import java.util.Set;
 
 public class Constants {
     public static final String MODID = "strawgolem";
@@ -29,7 +36,29 @@ public class Constants {
         public static final double depositDistance = 1.5;
         public static boolean blockHarvest = CONFIG.getBool("Block Harvesting");
         public static boolean whitelistHarvest = CONFIG.getBool("Use Whitelist");
-        public static String whitelist = CONFIG.getString("Crop Whitelist");
+        public static Set<Block> whitelist = constructList(CONFIG.getString("Crop Whitelist"));
+
+        private static Set<Block> constructList(String list) {
+             Set<Block> set = new HashSet<>();
+             String delim = list.contains(",") ? "," : " ";
+             for (String str : list.split(delim)) {
+                 ResourceLocation location = ResourceLocation.tryParse(str);
+                 if (location == null) {
+                     LOG.error("Resource location for {} not found!", str);
+                 } else {
+                     try {
+                         if (BuiltInRegistries.ITEM.get(location) instanceof BlockItem block) {
+                             set.add(block.getBlock());
+                         } else if (BuiltInRegistries.BLOCK.get(location) != Blocks.AIR){
+                             set.add(BuiltInRegistries.BLOCK.get(location));
+                         }
+                     } catch (Exception e) {
+                         LOG.error("Unable to find the block for the resource location!");
+                     }
+                 }
+             }
+             return set;
+        }
     }
 
     public static class Animation {
