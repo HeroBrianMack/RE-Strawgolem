@@ -74,7 +74,7 @@ public class GolemHarvestGoal extends GolemMoveToBlockGoal {
                 // Handling golem collisions.
                 nudge(golem);
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
             // Using a try-catch to avoid all risk of player crashes.
             Constants.LOG.error(e.getMessage());
             stop();
