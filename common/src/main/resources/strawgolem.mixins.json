@@ -6,10 +6,10 @@
   "compatibilityLevel": "JAVA_18",
   "mixins": [
     "MixinPumpkin",
-    "MixinPlayer",
     "MixinServerPlayerMode"
   ],
   "client": [
+    "MixinPlayer",
     "MixinMinecraft"
   ],
   "server": [],
