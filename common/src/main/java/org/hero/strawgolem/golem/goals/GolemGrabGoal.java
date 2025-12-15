@@ -38,8 +38,9 @@ public class GolemGrabGoal extends GolemMoveToBlockGoal {
     int pickupTicks = 0;
     boolean pickUp = false;
     boolean itemAcquired = false;
+    boolean stop = false;
     // May just make this into a regular predicate
-    BiPredicate<ItemEntity> predicate = (gol, entity) -> validItems.contains(entity.getItem().getItem()) && !entity.hasPickUpDelay() && ReachHelper.canPath(golem, entity.blockPosition());
+    BiPredicate<ItemEntity> predicate = (gol, entity) -> isInValidItems(entity.getItem().getItem()) && !entity.hasPickUpDelay() && ReachHelper.canPath(golem, entity.blockPosition());
 
 
     public GolemGrabGoal(StrawGolem pMob) {
@@ -74,7 +75,10 @@ public class GolemGrabGoal extends GolemMoveToBlockGoal {
     @Override
     public void stop() {
         // ToDo: Look into a more gradual stop
-        mob.getNavigation().stop();    }
+        mob.getNavigation().stop();
+        stop = true;
+        itemAcquired = false;
+    }
 
     @Override
     public void tick() {
@@ -82,7 +86,7 @@ public class GolemGrabGoal extends GolemMoveToBlockGoal {
             if (!(currentTarget != null && currentTarget.isAlive())) {
                 updateNearbyItems();
                 if (items.isEmpty()) {
-                    // doesn't actually do anything
+                    // no items, don't continue
                     stop();
                     return;
                 }
@@ -91,29 +95,37 @@ public class GolemGrabGoal extends GolemMoveToBlockGoal {
                 moveMobToBlock();
             }
         }
+        if (mob.distanceTo(currentTarget) >= Constants.Golem.depositDistance && golem.getNavigation().isDone()) {
+            moveMobToBlock();
+        }
+        // ToDo: Switch off of currentTarget.hasPickUpDelay() causes issues if golem flickers in and out of range.
         if (!itemAcquired && !pickUp && ReachHelper.canReach(golem, currentTarget.blockPosition())
-                && golem.carryStatus() == 0 && currentTarget.isAlive() && !currentTarget.hasPickUpDelay()) {
+                && golem.carryStatus() == 0 && currentTarget.isAlive() && !currentTarget.hasPickUpDelay() && golem.onGround()) {
             currentTarget.setPickUpDelay(40);
-            golem.stopInPlace();
             golem.lookAt(currentTarget, 50f, 50f);
 //            golem.getAttributes().getInstance(Attributes.MOVEMENT_SPEED).setBaseValue(0);
             golem.setPickupStatus(currentTarget.getItem());
             pickUp = true;
         } else if (itemAcquired || (pickUp && currentTarget.isAlive() && golem.carryStatus() == 0
                 && ReachHelper.canReach(golem, currentTarget.blockPosition()))) {
+            if (pickupTicks == 5) golem.stopInPlace();
             if (pickupTicks == 20) {
                 golem.setItemSlot(EquipmentSlot.MAINHAND, currentTarget.getItem());
                 itemAcquired = true;
-                currentTarget.discard();
-            } else if (pickupTicks == 40) {
+                // Let the itemstack discard on its own
+                currentTarget.setItem(ItemStack.EMPTY);
+            } else if (pickupTicks >= 40) {
                 pickUp = false;
                 golem.setPickupStatus(0);
                 stop();
             }
             pickupTicks++;
-        } else {
+        } else if (pickupTicks != 0 || pickUp) {
+            itemAcquired = false;
             pickUp = false;
             golem.setPickupStatus(0);
+            pickupTicks = 0;
+            moveMobToBlock();
         }
     }
 
@@ -121,22 +133,25 @@ public class GolemGrabGoal extends GolemMoveToBlockGoal {
     @Override
     public void start() {
         updateNearbyItems();
+        stop = false;
         if (items.isEmpty()) return;
-        blockPos = items.getFirst().blockPosition();
+        currentTarget = items.getFirst();
         moveMobToBlock();
     }
 
     @Override
     protected void moveMobToBlock() {
-        this.mob.getNavigation().moveTo((double)this.blockPos.getX() + 0.5,
-                (double)(this.blockPos.getY()),
-                (double)this.blockPos.getZ() + 0.5,
-                0, this.speedModifier);
+        if (currentTarget != null) {
+            this.mob.getNavigation().moveTo(currentTarget.getX(),
+                    (currentTarget.getY()),
+                    currentTarget.getZ(),
+                    0, this.speedModifier);
+        }
     }
 
     @Override
     public boolean canContinueToUse() {
-        return (golem.carryStatus() == 0 || pickupTicks <= 40) && hasNearbyItem();
+        return !stop && (golem.carryStatus() == 0 || pickupTicks <= 40) && hasNearbyItem();
     }
 
     @Override
