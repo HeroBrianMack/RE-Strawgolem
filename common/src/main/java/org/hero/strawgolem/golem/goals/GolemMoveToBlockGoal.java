@@ -2,7 +2,7 @@ package org.hero.strawgolem.golem.goals;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Vec3i;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.MoveToBlockGoal;
 import net.minecraft.world.level.LevelReader;
@@ -40,6 +40,14 @@ public abstract class GolemMoveToBlockGoal extends MoveToBlockGoal {
         } else if (dir == Direction.EAST) {
             nudgeDir = Vec3.atLowerCornerOf(Direction.SOUTH.getNormal());
         }
+        // Multiplier to reduce the push force from 1 to 0.05.
+        double multiplier = 0.05;
+        golem.push(nudgeDir.multiply(multiplier, multiplier, multiplier));
+    }
+
+    protected void nudgeTowards(StrawGolem golem, Entity e) {
+        Vec3 nudgeDir = Vec3.ZERO;
+        nudgeDir.add(golem.getX() - e.getX(), 0, golem.getZ() - e.getZ());
         // Multiplier to reduce the push force from 1 to 0.05.
         double multiplier = 0.05;
         golem.push(nudgeDir.multiply(multiplier, multiplier, multiplier));
