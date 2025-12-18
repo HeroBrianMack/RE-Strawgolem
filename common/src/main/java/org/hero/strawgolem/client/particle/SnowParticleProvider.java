@@ -13,7 +13,6 @@ public class SnowParticleProvider implements ParticleProvider<SimpleParticleType
     
     // The registration function passes a SpriteSet, so we accept that and store it for further use.
     public SnowParticleProvider(SpriteSet spriteSet) {
-        System.out.println("CREATE PROV");
         this.spriteSet = spriteSet;
     }
     // This is where the magic happens. We return a new particle each time this method is called!
@@ -22,7 +21,6 @@ public class SnowParticleProvider implements ParticleProvider<SimpleParticleType
     public Particle createParticle(SimpleParticleType type, ClientLevel level,
                                    double x, double y, double z, double xv, double yv, double zv) {
         // We don't use the type and speed, and pass in everything else. You may of course use them if needed.
-        System.out.println("CREATE PART");
         return new SnowParticle(level, x, y, z, xv, yv, zv, spriteSet);
     }
 }

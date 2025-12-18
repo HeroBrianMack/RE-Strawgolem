@@ -70,7 +70,6 @@ public class GolemRenderer extends DynamicGeoEntityRenderer<StrawGolem> {
     @Override
     public void renderFinal(PoseStack poseStack, StrawGolem animatable, BakedGeoModel model, MultiBufferSource bufferSource, @Nullable VertexConsumer buffer, float partialTick, int packedLight, int packedOverlay, int colour) {
         if (animatable.createSnow) {
-            System.out.println("SNOW");
             animatable.createSnow = false;
             spawnParticleAtLocator(animatable, "locator", (SimplerParticleType) snow.get(), (SimplerParticleType) snowfall.get(), poseStack);
         }
