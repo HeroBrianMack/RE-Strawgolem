@@ -16,6 +16,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.AbstractGolem;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.Snowball;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
@@ -39,6 +40,8 @@ import software.bernie.geckolib.animation.AnimatableManager;
 import software.bernie.geckolib.util.GeckoLibUtil;
 import software.bernie.geckolib.util.RenderUtil;
 
+import java.time.LocalDate;
+import java.time.Month;
 import java.util.Queue;
 
 import static org.hero.strawgolem.Constants.*;
@@ -55,12 +58,15 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
     public static final double defaultWalkSpeed = Golem.defaultWalkSpeed;
     public static final float baseHealth = Golem.maxHealth;
     private static final EntityDataAccessor<Boolean> HAT = SynchedEntityData.defineId(StrawGolem.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> FESTIVE = SynchedEntityData.defineId(StrawGolem.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> CARRY_STATUS = SynchedEntityData.defineId(StrawGolem.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> PICKUP_STATUS = SynchedEntityData.defineId(StrawGolem.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> BARREL = SynchedEntityData.defineId(StrawGolem.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<BlockPos> PRIORITY_POS = SynchedEntityData.defineId(StrawGolem.class, EntityDataSerializers.BLOCK_POS);
 
     private boolean forceAnimationReset = false;
+    public boolean createSnow = false;
+
     @Override
     protected void registerGoals() {
         goalSelector.addGoal(2, new GolemWanderGoal(this));
@@ -75,6 +81,7 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
         pBuilder.define(CARRY_STATUS, 0);
         pBuilder.define(PICKUP_STATUS, 0);
         pBuilder.define(HAT, false);
+        pBuilder.define(FESTIVE, false);
         pBuilder.define(BARREL, 0);
         pBuilder.define(PRIORITY_POS, new BlockPos(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE));
     }
@@ -113,7 +120,7 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
     @Override
     protected InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
         if (level().isClientSide) return InteractionResult.PASS;
-        pPlayer.playSound(SoundRegistry.GOLEM_HAPPY.get());
+        this.playSound(SoundRegistry.GOLEM_HAPPY.get());
         ItemStack item = pPlayer.getMainHandItem();
         if (pHand == InteractionHand.MAIN_HAND && item != ItemStack.EMPTY) {
             if (item.is(Items.BARREL) && barrelHP() != Golem.barrelHealth) {
@@ -125,9 +132,15 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
                 } else {
                     setHealth(getHealth() + 3.0f);
                 }
+                this.playSound(SoundRegistry.GOLEM_INTERESTED.get());
                 item.shrink(1);
             } else if (item.is(ItemRegistry.STRAW_HAT.get()) && !hasHat()) {
                 entityData.set(HAT, true);
+                this.playSound(SoundRegistry.GOLEM_INTERESTED.get());
+            } else if (item.is(Items.BRUSH)) {
+                this.playSound(SoundRegistry.GOLEM_HAPPY.get());
+                entityData.set(FESTIVE, false);
+
             }
             return InteractionResult.CONSUME;
         } else if (pHand == InteractionHand.MAIN_HAND
@@ -147,6 +160,15 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
     // may mess with knockback when barreled, or change this to the hurt method...
     @Override
     protected void actuallyHurt(DamageSource pDamageSource, float pDamageAmount) {
+        try {
+            if (pDamageSource.getDirectEntity() instanceof Snowball && isHoliday() && !this.level().isClientSide) {
+                this.playSound(SoundRegistry.GOLEM_STRAINED.get());
+                entityData.set(FESTIVE, true);
+                return;
+            }
+        } catch(Throwable e) {
+            LOG.error(e.getMessage());
+        }
         if (barrelHP() - pDamageAmount >= 0) { // barrel blocks
             entityData.set(BARREL, (int) (barrelHP() - pDamageAmount));
             playSound(SoundEvents.SHIELD_BLOCK);
@@ -158,6 +180,7 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
             playSound(SoundEvents.SHIELD_BREAK);
         }
         // TODO: Add Panic
+        this.playSound(SoundRegistry.GOLEM_HURT.get());
         super.actuallyHurt(pDamageSource, pDamageAmount);
     }
 
@@ -167,6 +190,7 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
         // Checking if golem speed needs fixed
         // Hat!
         this.entityData.set(HAT, tag.getBoolean("hat"));
+        this.entityData.set(FESTIVE, tag.getBoolean("festive"));
         this.entityData.set(CARRY_STATUS, tag.getInt("carry"));
         // Barrel!
         this.entityData.set(BARREL, tag.getInt("barrelHP"));
@@ -176,6 +200,7 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
     @Override
     public void addAdditionalSaveData(CompoundTag tag) {
         tag.putBoolean("hat", this.hasHat());
+        tag.putBoolean("festive", this.entityData.get(FESTIVE));
         tag.putInt("carry", carryStatus());
         tag.putInt("barrelHP", barrelHP());
         tag.putLong("priorityPos", this.entityData.get(PRIORITY_POS).asLong());
@@ -217,6 +242,16 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
 
     public void setCarryStatus(int status) {
         entityData.set(CARRY_STATUS, status);
+    }
+
+    public boolean isFestive() {
+        return entityData.get(FESTIVE);
+    }
+
+    private boolean isHoliday() {
+        Month month = LocalDate.now().getMonth();
+        // Define the range: Dec 20th to Dec 27th
+        return month == Month.DECEMBER || month == Month.JANUARY;
     }
 
     /**

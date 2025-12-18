@@ -39,5 +39,10 @@ public class GolemHarvestAnimationController extends AnimationController<StrawGo
         setCustomInstructionKeyframeHandler(event -> {
             if (event.getKeyframeData().getInstructions().equals("completeHarvest")) {}
         });
+        setParticleKeyframeHandler(event -> {
+            if (animatable.isFestive() && event.getKeyframeData().getEffect().equals("strawgolem:snow")) animatable.createSnow = true;
+        });
+
+
     }
 }
