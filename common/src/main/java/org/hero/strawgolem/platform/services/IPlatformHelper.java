@@ -1,6 +1,8 @@
 package org.hero.strawgolem.platform.services;
 
 import net.minecraft.core.Holder;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleType;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -56,7 +58,7 @@ public interface IPlatformHelper {
     <T extends Item> Supplier<T> registerItem(String id, Supplier<T> item);
     <T extends SoundEvent> Supplier<T> registerSound(String id, Supplier<T> sound);
     <T extends CreativeModeTab> Supplier<T> registerCreativeModeTab(String id, Supplier<T> tab);
-
+    <T extends ParticleOptions> Supplier<ParticleType<T>> registerParticle(String id, Supplier<ParticleType<T>> particle);
     <E extends Mob> Supplier<SpawnEggItem> makeSpawnEggFor(Supplier<EntityType<E>> entityType, int primaryEggColour, int secondaryEggColour, Item.Properties itemProperties);
     CreativeModeTab.Builder newCreativeTabBuilder();
 }

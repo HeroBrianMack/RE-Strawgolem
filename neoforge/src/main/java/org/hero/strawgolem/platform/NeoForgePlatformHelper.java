@@ -1,5 +1,8 @@
 package org.hero.strawgolem.platform;
 
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleType;
+import net.minecraft.core.particles.SimpleParticleType;
 import net.neoforged.fml.loading.FMLPaths;
 import org.hero.strawgolem.StrawNeo;
 import org.hero.strawgolem.platform.services.IPlatformHelper;
@@ -23,7 +26,6 @@ import java.nio.file.Path;
 import java.util.function.Supplier;
 
 public class NeoForgePlatformHelper implements IPlatformHelper {
-
     @Override
     public String getPlatformName() {
         return "NeoForge";
@@ -57,6 +59,11 @@ public class NeoForgePlatformHelper implements IPlatformHelper {
     @Override
     public <T extends Entity> Supplier<EntityType<T>> registerEntity(String id, Supplier<EntityType<T>> entity) {
         return StrawNeo.ENTITIES.register(id, entity);
+    }
+
+    @Override
+    public <T extends ParticleOptions> Supplier<ParticleType<T>> registerParticle(String id, Supplier<ParticleType<T>> particle) {
+        return StrawNeo.PARTICLES.register(id, particle);
     }
 
     @Override

@@ -1,6 +1,8 @@
 package org.hero.strawgolem.platform;
 
 import net.minecraft.core.Holder;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleType;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -77,6 +79,11 @@ public class ForgePlatformHelper implements IPlatformHelper {
     @Override
     public <T extends CreativeModeTab> Supplier<T> registerCreativeModeTab(String id, Supplier<T> tab) {
         return StrawForge.CREATIVE_TABS.register(id, tab);
+    }
+
+    @Override
+    public <T extends ParticleOptions> Supplier<ParticleType<T>> registerParticle(String id, Supplier<ParticleType<T>> particle) {
+        return StrawForge.PARTICLES.register(id, particle);
     }
 
     @Override

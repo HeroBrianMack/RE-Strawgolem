@@ -3,6 +3,7 @@ package org.hero.strawgolem;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import org.hero.strawgolem.registry.EntityRegistry;
+import org.hero.strawgolem.registry.ParticleRegistry;
 
 public class StrawFabric implements ModInitializer {
 

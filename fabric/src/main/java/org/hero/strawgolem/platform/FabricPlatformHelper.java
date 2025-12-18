@@ -3,6 +3,8 @@ package org.hero.strawgolem.platform;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -78,6 +80,11 @@ public class FabricPlatformHelper implements IPlatformHelper {
     @Override
     public <T extends CreativeModeTab> Supplier<T> registerCreativeModeTab(String id, Supplier<T> tab) {
         return registerSupplier(BuiltInRegistries.CREATIVE_MODE_TAB, id, tab);
+    }
+
+    @Override
+    public <T extends ParticleOptions> Supplier<ParticleType<T>> registerParticle(String id, Supplier<ParticleType<T>> particle) {
+        return registerSupplier(BuiltInRegistries.PARTICLE_TYPE, id, particle);
     }
 
     @Override
