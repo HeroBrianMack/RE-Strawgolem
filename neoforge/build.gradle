@@ -38,5 +38,8 @@ neoForge {
 }
 dependencies {
     implementation "software.bernie.geckolib:geckolib-neoforge-${minecraft_version}:${geckolib_version}"
+    compileOnly("mezz.jei:jei-${mc_version}-neoforge-api:${jei_version}")
+    // at runtime, use the full JEI jar for NeoForge
+    runtimeOnly("mezz.jei:jei-${mc_version}-neoforge:${jei_version}")
 }
 sourceSets.main.resources { srcDir 'src/generated/resources' }
