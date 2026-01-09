@@ -2,7 +2,7 @@
 This mod adds a helpful and pretty adorable little golem to do some of your farming for you. It can harvest, replant and deliver crops to a nearby storage.
 To download, head on over to either [CurseForge](https://www.curseforge.com/minecraft/mc-mods/straw-golem-rebaled-ported) or [Modrinth](https://modrinth.com/mod/straw-golem-rebaled-updated).
 - It's available for Fabric, Forge, and NeoForge, each at the same stage of development.
-- This mod, made for Minecraft 1.21+ (1.20 versions still exist [here](https://github.com/HeroBrianMack/strawgolem) but won't receive major updates at this moment), is a spiritual successor to the spirtual successor (now say that three times fast) of the now unavailable [original](https://www.curseforge.com/minecraft/mc-mods/strawgolem) Straw Golem mod, built for Minecraft 1.12.
+- This mod, made for Minecraft 1.21+ (currently only 1.21 and 1.21.1, however, 1.20 versions still exist [here](https://github.com/HeroBrianMack/strawgolem) but won't receive major updates at this moment), is a spiritual successor to the spirtual successor (now say that three times fast) of the now unavailable [original](https://www.curseforge.com/minecraft/mc-mods/strawgolem) Straw Golem mod, built for Minecraft 1.12.
 
 | <img src="https://github.com/user-attachments/assets/75ef0baf-33f6-48b3-a39d-7f2840b048de" width="400" height="400" alt="Winter event strawgolem 2025"> |
 |:--:|
