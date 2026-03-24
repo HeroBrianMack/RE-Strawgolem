@@ -27,7 +27,6 @@ public class GolemDepositGoal extends GolemMoveToBlockGoal {
 
     @Override
     public void start() {
-        blockPos = golem.deliverer.getDeliverable();
         // Safety check in case getDeliverable fails
         if (blockPos == null) {
             Constants.LOG.error("Deposit Start Error!");
@@ -41,23 +40,34 @@ public class GolemDepositGoal extends GolemMoveToBlockGoal {
 
     @Override
     public void tick() {
-        super.tick();
-        if (this.blockPos == null){ // In theory not possible
-            Constants.LOG.error("Missing block position!");
-        } else if (mob.hasItemInSlot(EquipmentSlot.MAINHAND) && ReachHelper.canReach(mob, blockPos)) {
-            golem.deliverer.deliver(golem.level(), blockPos);
-            tryPlaySound();
-            golem.getNavigation().stop();
-            done = true;
-        } else if (shouldRecalculatePath() && golemCollision(golem)) {
-            nudge(golem);
+        // Hopefully unneeded try-catch, but I want players to never have an unwanted crash.
+        try {
+            // This should never have been possible, but it is happening.
+            if (this.blockPos == null) {
+                Constants.LOG.error("Missing block position!");
+                return;
+            }
+            super.tick();
+            if (mob.hasItemInSlot(EquipmentSlot.MAINHAND) && ReachHelper.canReach(mob, blockPos)) {
+                golem.deliverer.deliver(golem.level(), blockPos);
+                tryPlaySound();
+                golem.getNavigation().stop();
+                done = true;
+            } else if (shouldRecalculatePath() && golemCollision(golem)) {
+                nudge(golem);
+            }
+        } catch (Throwable e) {
+            Constants.LOG.error("Golem Deposit Goal has experienced an error: {}", e);
         }
     }
 
     @Override
     public boolean canUse() {
+        if (blockPos == null) {
+            blockPos = golem.deliverer.getDeliverable();
+        }
         return mob.hasItemInSlot(EquipmentSlot.MAINHAND)
-                && golem.deliverer.getDeliverable() != null;
+                && blockPos != null;
     }
 
     @Override
