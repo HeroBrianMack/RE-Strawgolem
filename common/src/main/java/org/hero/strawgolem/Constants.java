@@ -24,6 +24,8 @@ public class Constants {
         // Health
         public static final float maxHealth = CONFIG.getFloat("Max Health");
         public static final int barrelHealth = CONFIG.getInt("Barrel Max Health");
+        public static final int maxHunger = CONFIG.getInt("Golem Hunger Time");
+        public static final int maxLife = CONFIG.getInt("Golem Lifespan Time");
         // Movement
         public static final double defaultMovement = 0.23;
         public static final double defaultWalkSpeed = CONFIG.getDouble("Walk Speed");

@@ -27,6 +27,9 @@ import org.hero.strawgolem.golem.api.ContainerHelper;
 import org.hero.strawgolem.golem.api.ReachHelper;
 import org.hero.strawgolem.golem.api.BiPredicate;
 import org.hero.strawgolem.golem.api.VisionHelper;
+import org.hero.strawgolem.golem.features.GolemHungerFeature;
+import org.hero.strawgolem.golem.features.GolemLifespanFeature;
+import org.hero.strawgolem.golem.features.IGolemTickFeature;
 import org.hero.strawgolem.golem.goals.GolemDepositGoal;
 import org.hero.strawgolem.golem.goals.GolemGrabGoal;
 import org.hero.strawgolem.golem.goals.GolemHarvestGoal;
@@ -42,6 +45,7 @@ import software.bernie.geckolib.util.RenderUtil;
 
 import java.time.LocalDate;
 import java.time.Month;
+import java.util.List;
 import java.util.Queue;
 
 import static org.hero.strawgolem.Constants.*;
@@ -52,8 +56,9 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
     }
     private final AnimatableInstanceCache instanceCache = GeckoLibUtil.createInstanceCache(this);
     public final Deliverer deliverer = new Deliverer();
-    public final Harvester harvester = new Harvester();
-
+    private final GolemHungerFeature hunger = new GolemHungerFeature(this);
+    private final GolemLifespanFeature lifeSpan = new GolemLifespanFeature(this);
+    private final List<IGolemTickFeature> features = List.of(hunger, lifeSpan);
     public static final double defaultMovement = Golem.defaultMovement;
     public static final double defaultWalkSpeed = Golem.defaultWalkSpeed;
     public static final float baseHealth = Golem.maxHealth;
@@ -62,6 +67,9 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
     private static final EntityDataAccessor<Integer> CARRY_STATUS = SynchedEntityData.defineId(StrawGolem.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> PICKUP_STATUS = SynchedEntityData.defineId(StrawGolem.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> BARREL = SynchedEntityData.defineId(StrawGolem.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> HUNGER = SynchedEntityData.defineId(StrawGolem.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> LIFE_SPAN = SynchedEntityData.defineId(StrawGolem.class, EntityDataSerializers.INT);
+
     private static final EntityDataAccessor<BlockPos> PRIORITY_POS = SynchedEntityData.defineId(StrawGolem.class, EntityDataSerializers.BLOCK_POS);
 
     private boolean forceAnimationReset = false;
@@ -83,6 +91,8 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
         pBuilder.define(HAT, false);
         pBuilder.define(FESTIVE, false);
         pBuilder.define(BARREL, 0);
+        pBuilder.define(HUNGER, 0);
+        pBuilder.define(LIFE_SPAN, 0);
         pBuilder.define(PRIORITY_POS, new BlockPos(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE));
     }
     @Override
@@ -110,12 +120,16 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
 
     @Override
     public void tick() {
+        // Tick each feature
+        features.forEach(IGolemTickFeature::tick);
         Item item = getMainHandItem().getItem();
         if (item instanceof BlockItem && !(item instanceof ItemNameBlockItem)) setCarryStatus(2);
         else if (!getMainHandItem().isEmpty()) setCarryStatus(1);
         else setCarryStatus(0);
         super.tick();
     }
+
+    // ToDo: Confirm glitch's continued existence.
 // seems to have an item dupe glitch...
     @Override
     protected InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
@@ -127,6 +141,10 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
                 entityData.set(BARREL, Golem.barrelHealth);
                 item.shrink(1);
             } else if (item.is(Items.WHEAT) && healthStatus() != 0) {
+                // Decreasing life span by life a third of max life span to a minimum of 0.
+                setLifeSpan(Math.max(0, getLifeSpan() - Golem.maxLife / 3));
+                // Updating the golem's max health
+                lifeSpan.updateGolemHealth();
                 if (getMaxHealth() - getHealth() < 3.0f) {
                     setHealth(getMaxHealth());
                 } else {
@@ -194,6 +212,8 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
         this.entityData.set(CARRY_STATUS, tag.getInt("carry"));
         // Barrel!
         this.entityData.set(BARREL, tag.getInt("barrelHP"));
+        this.entityData.set(HUNGER, tag.getInt("hunger"));
+        this.entityData.set(LIFE_SPAN, tag.getInt("hunger"));
         this.entityData.set(PRIORITY_POS, BlockPos.of(tag.getLong("priorityPos")));
     }
 
@@ -203,6 +223,7 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
         tag.putBoolean("festive", this.entityData.get(FESTIVE));
         tag.putInt("carry", carryStatus());
         tag.putInt("barrelHP", barrelHP());
+        tag.putInt("hunger", getHunger());
         tag.putLong("priorityPos", this.entityData.get(PRIORITY_POS).asLong());
 //        tag.putInt("barrelHealth", this.entityData.get(BARREL_HEALTH));
 //        tag.putBoolean("fixSpeed", fixSpeed);
@@ -220,7 +241,9 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
      */
     public int healthStatus() {
         // basic code to check how dead a golem is
-        return getMaxHealth() - 0.0001f <= getHealth() ? 0 : getMaxHealth() * 0.333333 < getHealth() ? 1 : 2;
+//        return getMaxHealth() - 0.0001f <= getHealth() ? 0 : getMaxHealth() * 0.333333 < getHealth() ? 1 : 2;
+        // Switching to use baseHealth now that life span is being implemented
+        return baseHealth - 0.0001f <= getHealth() ? 0 : baseHealth * 0.333333 < getHealth() ? 1 : 2;
     }
 
     /**
@@ -327,13 +350,36 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
         this.forceAnimationReset = true;
     }
 
-    public class Harvester {
-        Queue<BlockPos> harvestLocations;
-        BlockPos nextLocation() {
-            return harvestLocations == null ? null : harvestLocations.poll();
-        }
-
+    /**
+     * Sets the golem's hunger level.
+     * @param hunger The number to set as the golem's hunger.
+     */
+    public void setHunger(int hunger) {
+        entityData.set(HUNGER, hunger);
     }
+    /**
+     * Gets the golem's hunger level.
+     */
+    public int getHunger() {
+        return entityData.get(HUNGER);
+    }
+
+    /**
+     * Sets the golem's life span.
+     * @param life The number to set as the golem's life.
+     */
+    public void setLifeSpan(int life) {
+        entityData.set(LIFE_SPAN, life);
+    }
+
+    /**
+     * Gets the golem's life span.
+     */
+    public int getLifeSpan() {
+        return entityData.get(LIFE_SPAN);
+    }
+
+    // ToDo: Move this out of StrawGolem, it can simply be in GolemDepositGoal.
     public class Deliverer {
         BlockPos storagePos;
         public BlockPos getDeliverable() {
