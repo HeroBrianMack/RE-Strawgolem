@@ -32,6 +32,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Scanner;
+import java.util.Set;
 
 public class SimpleConfig {
 
@@ -53,6 +54,7 @@ public class SimpleConfig {
         private final File file;
         private final String filename;
         private DefaultConfig provider;
+        private boolean remake = false;
 
         private ConfigRequest(File file, String filename ) {
             this.file = file;
@@ -83,6 +85,17 @@ public class SimpleConfig {
             return new SimpleConfig( this );
         }
 
+        /**
+         * Loads the config from the filesystem.
+         * @param remake If the config file should be overwritten.
+         * @return config object
+         * @see SimpleConfig
+         */
+        public SimpleConfig request(boolean remake) {
+            this.remake = remake;
+            return new SimpleConfig( this);
+        }
+
         private String getConfig() {
             return provider.get() + "\n";
         }
@@ -105,7 +118,7 @@ public class SimpleConfig {
 
         // try creating missing files
         request.file.getParentFile().mkdirs();
-        Files.createFile( request.file.toPath() );
+//        Files.createFile( request.file.toPath() );
 
         // write default config data
         PrintWriter writer = new PrintWriter(request.file, "UTF-8");
@@ -135,30 +148,48 @@ public class SimpleConfig {
     private SimpleConfig( ConfigRequest request ) {
         this.request = request;
         String identifier = "Config '" + request.filename + "'";
-        if( !request.file.exists() ) {
-            LOGGER.info( identifier + " is missing, generating default one..." );
+        if( !request.file.exists()) {
+            LOGGER.info("{} {}", identifier, "is missing, generating default one..." );
 
-            try {
-                createConfig();
-            } catch (IOException e) {
-                LOGGER.error( identifier + " failed to generate!" );
-                LOGGER.error(e.getMessage());
-                LOGGER.trace( e );
-                broken = true;
-            }
+            regenConfig(identifier);
+        } else if (request.remake) {
+            LOGGER.info("{} {}", identifier, "is outdated or missing configs, adding missing configs..." );
+
+            regenConfig(identifier);
         }
-
         if( !broken ) {
             try {
                 loadConfig();
             } catch (Exception e) {
-                LOGGER.error( identifier + " failed to load!" );
+                LOGGER.error("{} {}", identifier, "failed to load!" );
                 LOGGER.trace( e );
                 LOGGER.error(e.getMessage());
                 broken = true;
             }
         }
 
+    }
+
+    private void regenConfig(String identifier) {
+        try {
+            createConfig();
+        } catch (IOException e) {
+            LOGGER.error("{} {}", identifier, "failed to generate!" );
+            LOGGER.error(e.getMessage());
+            LOGGER.trace( e );
+            broken = true;
+        }
+    }
+
+    /**
+     * Queries a value from config, returns `null` if the
+     * key does not exist.
+     *
+     * @return  value corresponding to the given key
+     * @see     SimpleConfig#getOrDefault
+     */
+    public Set<String> getKeys() {
+        return config.keySet();
     }
 
     /**

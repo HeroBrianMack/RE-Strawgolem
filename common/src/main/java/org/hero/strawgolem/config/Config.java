@@ -2,8 +2,10 @@ package org.hero.strawgolem.config;
 
 import org.hero.strawgolem.Constants;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class Config {
     // Load config 'config.properties', if it isn't present create one
@@ -11,14 +13,49 @@ public class Config {
     private SimpleConfig CONFIG;
     private String file = "";
     private Map<String, Object> defaults;
+    private ArrayList<Runnable> CONFIG_REBUILD = new ArrayList<>();
 
     public Config() {
+        consConfig();
+        if (!CONFIG.getKeys().containsAll(defaults.keySet())) {
+            rebuildConfig();
+        }
+        // No need to have values in the rebuilder anymore, so just make it null.
+        CONFIG_REBUILD = null;
+
+        Constants.LOG.debug("{}", CONFIG.isBroken());
+    }
+
+    private void consConfig() {
+        Constants.LOG.error("MZEY");
         defaults = new HashMap<>();
         section("Strawgolem Config");
+        CONFIG_REBUILD.add(() -> file += "\n");
         file += "\n";
+        golemHealthSection();
+        golemMovementSection();
+        golemHarvestingSection();
+        CONFIG = SimpleConfig.of("strawgolem").provider(this::provider)
+                .request();
+    }
+
+    /**
+     * Method that handles the Golem Health Section of the Config.
+     */
+    private void golemHealthSection() {
         section("Golem Health");
         add("Max Health", 6f, "The max health of a golem.");
         add("Barrel Max Health", 100, "The max health of a barrel.");
+        add("Golem Hunger Time", 1200, "The time in seconds " +
+                "it takes for a Straw Golem to become fully hungry.");
+        add("Golem Lifespan Time", 1200, "The time in seconds " +
+                "that a Straw Golem will have as a natural lifespan.");
+    }
+
+    /**
+     * Method that handles the Golem Movement Section of the Config.
+     */
+    private void golemMovementSection() {
         section("Golem Movement");
         add("Walk Speed", 0.5,
                 "The walk speed of a golem.");
@@ -27,6 +64,12 @@ public class Config {
         add("Wander Range", 24, "How far a golem can wander");
         add("Panic When Hurt", true,
                 "Whether a golem should panic when hurt.");
+    }
+
+    /**
+     * Method that handles the Golem Harvesting Section of the Config.
+     */
+    private void golemHarvestingSection() {
         section("Golem Harvesting");
         add("Harvest Range", 24,
                 "Range for a golem to detect crops and chests.");
@@ -38,9 +81,14 @@ public class Config {
         add("Crop Whitelist", " ",
                 "What crops should be harvested,"
                         + " please use valid resource locations.");
+    }
+
+    private void rebuildConfig() {
+        Constants.LOG.error("MZES");
+        file = "";
+        CONFIG_REBUILD.forEach(Runnable::run);
         CONFIG = SimpleConfig.of("strawgolem").provider(this::provider)
-                .request();
-        Constants.LOG.debug("{}", CONFIG.isBroken());
+                .request(true);
     }
 
     // if the custom provider is not specified SimpleConfig will create an empty file instead
@@ -49,12 +97,27 @@ public class Config {
         return file;
     }
 
+    // Special variation just for rebuilding config.
+    private void add(String key, String description) {
+        description(description);
+        if (Objects.equals(key, "Golem Hunger Time")) {
+            System.out.println(getObject(key));
+            System.out.println(defaults.keySet());
+        }
+        add(key, getObject(key));
+    }
+
+    private void cheapAdd(String key, Object value) {
+        file += key + "=" + value + "\n";
+    }
+
     private void add(String key, Object value) {
         file += key + "=" + value + "\n";
         defaults.put(key, value);
     }
 
     private void add(String key, Object value, String description) {
+        CONFIG_REBUILD.add(() -> add(key, description));
         description(description);
         add(key, value);
     }
@@ -64,6 +127,11 @@ public class Config {
      * @param section The section
      */
     private void section(String section) {
+        CONFIG_REBUILD.add(() -> safeSection(section));
+        file += "# [" + section + "]\n";
+    }
+
+    private void safeSection(String section) {
         file += "# [" + section + "]\n";
     }
 
