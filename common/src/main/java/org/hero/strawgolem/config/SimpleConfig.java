@@ -118,7 +118,6 @@ public class SimpleConfig {
 
         // try creating missing files
         request.file.getParentFile().mkdirs();
-//        Files.createFile( request.file.toPath() );
 
         // write default config data
         PrintWriter writer = new PrintWriter(request.file, "UTF-8");
