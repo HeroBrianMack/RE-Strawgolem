@@ -121,7 +121,8 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
     @Override
     public void tick() {
         // Tick each feature
-        features.forEach(IGolemTickFeature::tick);
+        // May need to push all of these onto serverSide
+        if (!level().isClientSide) features.forEach(IGolemTickFeature::tick);
         Item item = getMainHandItem().getItem();
         if (item instanceof BlockItem && !(item instanceof ItemNameBlockItem)) setCarryStatus(2);
         else if (!getMainHandItem().isEmpty()) setCarryStatus(1);
@@ -144,7 +145,7 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
                 // Decreasing life span by life a third of max life span to a minimum of 0.
                 setLifeSpan(Math.max(0, getLifeSpan() - Golem.maxLife / 3));
                 // Updating the golem's max health
-                lifeSpan.updateGolemHealth();
+                lifeSpan.refresh();
                 if (getMaxHealth() - getHealth() < 3.0f) {
                     setHealth(getMaxHealth());
                 } else {
@@ -243,7 +244,7 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
         // basic code to check how dead a golem is
 //        return getMaxHealth() - 0.0001f <= getHealth() ? 0 : getMaxHealth() * 0.333333 < getHealth() ? 1 : 2;
         // Switching to use baseHealth now that life span is being implemented
-        return baseHealth - 0.0001f <= getHealth() ? 0 : baseHealth * 0.333333 < getHealth() ? 1 : 2;
+        return getHealth() / baseHealth > 0.8 ? 0 : baseHealth * 0.333333 < getHealth() ? 1 : 2;
     }
 
     /**

@@ -60,4 +60,9 @@ public class GolemLifespanFeature implements IGolemTickFeature {
             Constants.LOG.error("Golem missing Attribute: {}!", "Max Health");
         }
     }
+
+    public void refresh() {
+        counter = 0;
+        updateGolemHealth();
+    }
 }

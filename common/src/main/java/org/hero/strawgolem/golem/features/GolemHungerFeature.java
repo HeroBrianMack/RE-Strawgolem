@@ -60,4 +60,9 @@ public class GolemHungerFeature implements IGolemTickFeature {
             Constants.LOG.error("Golem missing Attribute: {}!", "Movement Speed");
         }
     }
+
+    public void refresh() {
+        counter = 0;
+        updateGolemSpeed();
+    }
 }

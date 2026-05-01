@@ -4,4 +4,6 @@ import org.hero.strawgolem.golem.StrawGolem;
 
 public interface IGolemTickFeature {
     public void tick();
+
+    public void refresh();
 }
