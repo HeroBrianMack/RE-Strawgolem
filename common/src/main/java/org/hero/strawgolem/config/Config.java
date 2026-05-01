@@ -14,7 +14,7 @@ public class Config {
     private String file = "";
     private Map<String, Object> defaults;
     private ArrayList<Runnable> CONFIG_REBUILD = new ArrayList<>();
-
+    // Future possibility: Map<Str, Str> rename/migrate
     public Config() {
         consConfig();
         if (!CONFIG.getKeys().containsAll(defaults.keySet())) {
@@ -27,7 +27,6 @@ public class Config {
     }
 
     private void consConfig() {
-        Constants.LOG.error("MZEY");
         defaults = new HashMap<>();
         section("Strawgolem Config");
         CONFIG_REBUILD.add(() -> file += "\n");
@@ -46,10 +45,19 @@ public class Config {
         section("Golem Health");
         add("Max Health", 6f, "The max health of a golem.");
         add("Barrel Max Health", 100, "The max health of a barrel.");
-        add("Golem Hunger Time", 1200, "The time in seconds " +
+        add("Hunger", false, "Whether a golem should have hunger.");
+        add("Hunger Time", 4800, "The time in seconds " +
                 "it takes for a Straw Golem to become fully hungry.");
-        add("Golem Lifespan Time", 1200, "The time in seconds " +
-                "that a Straw Golem will have as a natural lifespan.");
+        add("Food Item", "minecraft:apple", "The item(s) a golem is fed with.");
+        add("Lifespan", false, "Whether a golem should have a lifespan.");
+        add("Lifespan Time", 4800, "The time in seconds " +
+                "that a Straw Golem will have as a natural lifespan in a default environment.");
+        add("Repair Item", "minecraft:wheat", "The item(s) a golem is repaired with.");
+        add("Shiver", true, "Whether a golem should shiver in response to environmental factors " +
+                "such as rain and cold biomes.");
+        add("Environmental Decay", false, "Whether a golem should age faster or slower" +
+                " in response to environmental factors, examples being:\n# A golem in rain or water will age faster, " +
+                "whereas a golem in cold biomes will age slower.");
     }
 
     /**
@@ -84,7 +92,6 @@ public class Config {
     }
 
     private void rebuildConfig() {
-        Constants.LOG.error("MZES");
         file = "";
         CONFIG_REBUILD.forEach(Runnable::run);
         CONFIG = SimpleConfig.of("strawgolem").provider(this::provider)
@@ -171,6 +178,9 @@ public class Config {
 
     public double getDouble(String key) {
         try {
+            if (getObject(key) == null) {
+                return 1.0;
+            }
             return Double.parseDouble((String) getObject(key));
         } catch (Throwable e) {
             Constants.LOG.error(e.getMessage());
@@ -186,6 +196,9 @@ public class Config {
 
     public float getFloat(String key) {
         try {
+            if (getObject(key) == null) {
+                return 1.0f;
+            }
             return Float.parseFloat((String) getObject(key));
         } catch (Throwable e) {
             Constants.LOG.error(e.getMessage());
@@ -201,13 +214,16 @@ public class Config {
 
     public int getInt(String key) {
         try {
+            if (getObject(key) == null) {
+                return 1;
+            }
             return Integer.parseInt((String) getObject(key));
         } catch (Throwable e) {
-            Constants.LOG.error(e.getMessage());
+            Constants.LOG.error(key + "  " + e.getMessage());
             try {
                 return Integer.parseInt((String) defaults.get(key));
             } catch (Throwable q) {
-                Constants.LOG.error(q.getMessage());
+                Constants.LOG.error(key + " " + q.getMessage());
             }
         }
         return 1;
@@ -215,13 +231,16 @@ public class Config {
 
     public boolean getBool(String key) {
         try {
+            if (getObject(key) == null) {
+                return false;
+            }
             return Boolean.parseBoolean((String) getObject(key));
         } catch (Throwable e) {
-            Constants.LOG.error(e.getMessage());
+            Constants.LOG.error(key +  " " + e.getMessage());
             try {
                 return Boolean.parseBoolean((String) defaults.get(key));
             } catch (Throwable q) {
-                Constants.LOG.error(q.getMessage());
+                Constants.LOG.error(key+ " " +q.getMessage());
             }
         }
         return false;
@@ -229,6 +248,9 @@ public class Config {
 
     public String getString(String key) {
         try {
+            if (getObject(key) == null) {
+                return "";
+            }
             return (String) getObject(key);
         } catch (Throwable e) { // This catch should never be possible!
             Constants.LOG.error(e.getMessage());

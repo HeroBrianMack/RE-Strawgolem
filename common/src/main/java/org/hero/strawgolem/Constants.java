@@ -3,13 +3,14 @@ package org.hero.strawgolem;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import org.hero.strawgolem.config.Config;
 import org.hero.strawgolem.platform.services.IPlatformHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.util.Arrays;
+
 import java.util.HashSet;
 import java.util.ServiceLoader;
 import java.util.Set;
@@ -24,8 +25,13 @@ public class Constants {
         // Health
         public static final float maxHealth = CONFIG.getFloat("Max Health");
         public static final int barrelHealth = CONFIG.getInt("Barrel Max Health");
-        public static final int maxHunger = CONFIG.getInt("Golem Hunger Time");
-        public static final int maxLife = CONFIG.getInt("Golem Lifespan Time");
+        public static final int maxHunger = CONFIG.getInt("Hunger Time");
+        public static final Set<Item> foodItem = constructItemList(CONFIG.getString("Food Item"));
+        public static final int maxLife = CONFIG.getInt("Lifespan Time");
+        public static final Set<Item> repairItem = constructItemList(CONFIG.getString("Repair Item"));
+        public static final boolean shiver = CONFIG.getBool("Shiver");
+        public static final boolean dynamicDecay = CONFIG.getBool("Environmental Decay");
+
         // Movement
         public static final double defaultMovement = 0.23;
         public static final double defaultWalkSpeed = CONFIG.getDouble("Walk Speed");
@@ -38,9 +44,9 @@ public class Constants {
         public static final double depositDistance = 1.5;
         public static boolean blockHarvest = CONFIG.getBool("Block Harvesting");
         public static boolean whitelistHarvest = CONFIG.getBool("Use Whitelist");
-        public static Set<Block> whitelist = constructList(CONFIG.getString("Crop Whitelist"));
+        public static Set<Block> whitelist = constructBlockList(CONFIG.getString("Crop Whitelist"));
 
-        private static Set<Block> constructList(String list) {
+        private static Set<Block> constructBlockList(String list) {
              Set<Block> set = new HashSet<>();
              String delim = list.contains(",") ? "," : " ";
              for (String str : list.split(delim)) {
@@ -60,6 +66,24 @@ public class Constants {
                  }
              }
              return set;
+        }
+
+        private static Set<Item> constructItemList(String list) {
+            Set<Item> set = new HashSet<>();
+            String delim = list.contains(",") ? "," : " ";
+            for (String str : list.split(delim)) {
+                ResourceLocation location = ResourceLocation.tryParse(str);
+                if (location == null) {
+                    LOG.error("Resource location for {} not found!", str);
+                } else {
+                    try {
+                        set.add(BuiltInRegistries.ITEM.get(location));
+                    } catch (Exception e) {
+                        LOG.error("Unable to find the item for the resource location!");
+                    }
+                }
+            }
+            return set;
         }
     }
 
