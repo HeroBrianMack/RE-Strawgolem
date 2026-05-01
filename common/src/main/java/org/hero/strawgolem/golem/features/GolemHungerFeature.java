@@ -47,7 +47,7 @@ public class GolemHungerFeature implements IGolemTickFeature {
         // Using 3.0 to scale the speed, note that as hunger -> maxHunger the division should approach 1
         // Using 0.000001 as an epsilon, just to prevent any problems with imprecision.
         float epsilon = 0.000001f;
-        float speedRatio = (float) Math.floor(epsilon + -3.0
+        float speedRatio = (float) Math.floor(0.99 + -3.0
                 * (double) golem.getHunger() / Constants.Golem.maxHunger);
         // Flipping the order, so that the closer hunger is the maxHunger, the closer to 0.0f the speed becomes.
         speedRatio += 3.0f + epsilon;

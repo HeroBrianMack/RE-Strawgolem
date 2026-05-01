@@ -47,14 +47,15 @@ public class GolemLifespanFeature implements IGolemTickFeature {
         // Using 3.0 to scale the speed, note that as lifespan -> maxLife the division should approach 1
         // Using 0.000001 as an epsilon, just to prevent any problems with imprecision.
         float epsilon = 0.000001f;
-        float healthRatio = (float) Math.floor(epsilon + -3.0
+        int divisibility = 9;
+        float healthRatio = (float) Math.floor(0.99 - divisibility
                 * (double) golem.getLifeSpan() / Constants.Golem.maxLife);
         // Flipping the order, so that the closer life span is the max lifespan, the closer to 0.0f the health becomes.
-        healthRatio += 3.0f + epsilon;
+        healthRatio += divisibility + epsilon;
         var attr = golem.getAttribute(Attributes.MAX_HEALTH);
         if (attr != null) {
             // Normalizing speedRatio, since I don't want Golems moving triple speed.
-            attr.setBaseValue(Constants.Golem.maxHealth * Math.min(1.0f, healthRatio / 3.0f));
+            attr.setBaseValue(Constants.Golem.maxHealth * Math.min(divisibility, healthRatio / divisibility));
         } else {
             // Should never trigger, but best to be safe.
             Constants.LOG.error("Golem missing Attribute: {}!", "Max Health");
