@@ -14,12 +14,20 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
+import net.minecraft.world.entity.ai.goal.FloatGoal;
+import net.minecraft.world.entity.ai.goal.PanicGoal;
 import net.minecraft.world.entity.animal.AbstractGolem;
+import net.minecraft.world.entity.animal.Cow;
+import net.minecraft.world.entity.animal.Pig;
+import net.minecraft.world.entity.animal.Sheep;
+import net.minecraft.world.entity.monster.Pillager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Snowball;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
+import org.hero.strawgolem.Constants;
 import org.hero.strawgolem.client.GolemArmAnimationController;
 import org.hero.strawgolem.client.GolemHarvestAnimationController;
 import org.hero.strawgolem.client.GolemLegAnimationController;
@@ -30,10 +38,7 @@ import org.hero.strawgolem.golem.api.VisionHelper;
 import org.hero.strawgolem.golem.features.GolemHungerFeature;
 import org.hero.strawgolem.golem.features.GolemLifespanFeature;
 import org.hero.strawgolem.golem.features.IGolemTickFeature;
-import org.hero.strawgolem.golem.goals.GolemDepositGoal;
-import org.hero.strawgolem.golem.goals.GolemGrabGoal;
-import org.hero.strawgolem.golem.goals.GolemHarvestGoal;
-import org.hero.strawgolem.golem.goals.GolemWanderGoal;
+import org.hero.strawgolem.golem.goals.*;
 import org.hero.strawgolem.mixinInterfaces.GolemOrderer;
 import org.hero.strawgolem.registry.ItemRegistry;
 import org.hero.strawgolem.registry.SoundRegistry;
@@ -74,13 +79,33 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
 
     private boolean forceAnimationReset = false;
     public boolean createSnow = false;
-
+    private boolean panic = false;
     @Override
     protected void registerGoals() {
+        goalSelector.addGoal(0, new FloatGoal(this));
+        goalSelector.addGoal(0, new PanicGoal(this, Golem.defaultRunSpeed * 1.2));
+        generateAvoids();
         goalSelector.addGoal(2, new GolemWanderGoal(this));
         goalSelector.addGoal(1, new GolemDepositGoal(this));
         goalSelector.addGoal(1, new GolemHarvestGoal(this));
         goalSelector.addGoal(1, new GolemGrabGoal(this));
+    }
+
+    protected void generateAvoids() {
+        double walk = defaultWalkSpeed;
+//        walk = defaultWalkSpeed;
+        double run = Golem.defaultRunSpeed;
+//        run = Golem.defaultRunSpeed;
+        Constants.LOG.error("AGH: " + run + " " + walk);
+
+        goalSelector.addGoal(1, new GolemAvoidEntityGoal<>(this, Pillager.class,
+                (e) -> e.getTarget() instanceof StrawGolem, Golem.fleeRange, walk, run, EntitySelector.NO_CREATIVE_OR_SPECTATOR));
+        goalSelector.addGoal(1, new GolemAvoidEntityGoal<>(this, Sheep.class,
+                (e) -> e.getTarget() instanceof StrawGolem, Golem.fleeRange, walk, run, EntitySelector.NO_CREATIVE_OR_SPECTATOR));
+        goalSelector.addGoal(1, new GolemAvoidEntityGoal<>(this, Cow.class,
+                (e) -> e.getTarget() instanceof StrawGolem, Golem.fleeRange, walk, run, EntitySelector.NO_CREATIVE_OR_SPECTATOR));
+        goalSelector.addGoal(1, new GolemAvoidEntityGoal<>(this, Pig.class,
+                (e) -> e.getTarget() instanceof StrawGolem, Golem.fleeRange, walk, run, EntitySelector.NO_CREATIVE_OR_SPECTATOR));
     }
 
     @Override
@@ -122,7 +147,7 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
     public void tick() {
         // Tick each feature
         // May need to push all of these onto serverSide
-        if (!level().isClientSide) features.forEach(IGolemTickFeature::tick);
+        if (!level().isClientSide && isAlive()) features.forEach(IGolemTickFeature::tick);
         Item item = getMainHandItem().getItem();
         if (item instanceof BlockItem && !(item instanceof ItemNameBlockItem)) setCarryStatus(2);
         else if (!getMainHandItem().isEmpty()) setCarryStatus(1);
@@ -244,6 +269,7 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
         // basic code to check how dead a golem is
 //        return getMaxHealth() - 0.0001f <= getHealth() ? 0 : getMaxHealth() * 0.333333 < getHealth() ? 1 : 2;
         // Switching to use baseHealth now that life span is being implemented
+//        Constants.LOG.error("{} {}", getHealth(), baseHealth);
         return getHealth() / baseHealth > 0.8 ? 0 : baseHealth * 0.333333 < getHealth() ? 1 : 2;
     }
 
@@ -272,9 +298,9 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
         return entityData.get(FESTIVE);
     }
 
+    // ToDo: Handle hemisphere, likely config based
     private boolean isHoliday() {
         Month month = LocalDate.now().getMonth();
-        // Define the range: Dec 20th to Dec 27th
         return month == Month.DECEMBER || month == Month.JANUARY;
     }
 
@@ -338,6 +364,20 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
         return entityData.get(PRIORITY_POS);
     }
 
+    private boolean isInRain() {
+        BlockPos blockpos = this.blockPosition();
+        return this.level().isRainingAt(blockpos) || this.level().isRainingAt(BlockPos.containing((double)blockpos.getX(), this.getBoundingBox().maxY, (double)blockpos.getZ()));
+    }
+
+    private boolean isCold() {
+        return !this.level().getBiome(this.blockPosition()).value().warmEnoughToRain(this.blockPosition());
+    }
+
+    // May make barrel ignore cold shivering?
+    public boolean shouldShiver() {
+        return true|| isInWaterOrBubble() || isInPowderSnow || (isInRain() && !hasHat()) || isCold();
+    }
+
     public boolean shouldForceAnimationReset() {
         if (forceAnimationReset) {
             forceAnimationReset = false;
@@ -378,6 +418,14 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
      */
     public int getLifeSpan() {
         return entityData.get(LIFE_SPAN);
+    }
+
+    public boolean getPanic() {
+        return panic;
+    }
+
+    public void setPanic(boolean panic) {
+        this.panic = panic;
     }
 
     // ToDo: Move this out of StrawGolem, it can simply be in GolemDepositGoal.

@@ -8,7 +8,11 @@
     "MixinPumpkin",
     "MixinServerPlayerMode",
     "MixinStemBlock",
-    "MixinPlayer"
+    "MixinPlayer",
+    "MixinCow",
+    "MixinPig",
+    "MixinPillager",
+    "MixinSheep"
   ],
   "client": [],
   "server": [],
