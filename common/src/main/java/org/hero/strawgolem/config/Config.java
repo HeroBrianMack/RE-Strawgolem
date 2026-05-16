@@ -15,15 +15,26 @@ public class Config {
     private Map<String, Object> defaults;
     private ArrayList<Runnable> CONFIG_REBUILD = new ArrayList<>();
     // Future possibility: Map<Str, Str> rename/migrate
+    private HashMap<String, Map<String, Object>> versionOverrides = new HashMap<>();
     public Config() {
+
         consConfig();
         if (!CONFIG.getKeys().containsAll(defaults.keySet())) {
             rebuildConfig();
         }
-        // No need to have values in the rebuilder anymore, so just make it null.
+        // No need to have values in the rebuilder/overrider anymore, so just make it null.
         CONFIG_REBUILD = null;
-
+        versionOverrides = null;
         Constants.LOG.debug("{}", CONFIG.isBroken());
+    }
+
+    private void setVersionOverrides() {
+        // Version 1.0.0 Overrides:
+        versionOverrides.put("1.0.0",
+                Map.of("Config Version Number", "1.0.0"));
+        versionOverrides.get("1.0.0");
+        // Version X Overrides:
+        // Mandatory Future Override (version number)
     }
 
     private void consConfig() {
@@ -34,8 +45,16 @@ public class Config {
         golemHealthSection();
         golemMovementSection();
         golemHarvestingSection();
+        metaSection();
         CONFIG = SimpleConfig.of("strawgolem").provider(this::provider)
                 .request();
+    }
+
+    private void rebuildConfig() {
+        file = "";
+        CONFIG_REBUILD.forEach(Runnable::run);
+        CONFIG = SimpleConfig.of("strawgolem").provider(this::provider)
+                .request(true);
     }
 
     /**
@@ -91,13 +110,50 @@ public class Config {
                         + " please use valid resource locations.");
     }
 
-    private void rebuildConfig() {
-        file = "";
-        CONFIG_REBUILD.forEach(Runnable::run);
-        CONFIG = SimpleConfig.of("strawgolem").provider(this::provider)
-                .request(true);
+    private void metaSection() {
+        section("Meta Data");
+        add("Config Version Number", "1.0.0",
+                "Please do not modify this value casually, or risk config values being overwritten " +
+                        "or made invalid!");
     }
 
+    private int[] versionParse(String version) {
+        if (version == null) {
+            version = CONFIG.get("Config Version Number");
+        }
+        if (version == null) {
+            return new int[]{0, 0, 0};
+        } else {
+            try {
+                String[] split = version.splitWithDelimiters(".", 3);
+                return new int[]{Integer.parseInt(split[0]), Integer.parseInt(split[1]),
+                        Integer.parseInt(split[2])};
+            } catch (Exception e) {
+                Constants.LOG.debug("Error parsing config version number : {}", version);
+            }
+        }
+        // Currently force resets if version num broken. No different from 0, 0, 0 effectively.
+        // May use as a checker to disable resets?
+        return new int[]{-1, -1, -1};
+    }
+
+    private boolean shouldUpdate(String key) {
+        var currentVersion = versionParse(null);
+        for (var k : versionOverrides.keySet()) {
+            if (versionOverrides.get(k).containsKey(key)) {
+                var version = versionParse(k);
+                // (Major version <), or (Major =, Minor <), Or (Major =, Minor =, Mini <).
+                if (version[0] < currentVersion[0]
+                        || (version[0] == currentVersion[0]
+                            && (version[1] < currentVersion[1]
+                                || (version[1] == currentVersion[1]
+                                    && version[2] < currentVersion[2])))) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
     // if the custom provider is not specified SimpleConfig will create an empty file instead
     private String provider() {
         // Custom config provider, returns the default config content
@@ -170,7 +226,8 @@ public class Config {
 
     public Object getObject(String key) {
         Object defaultVal = defaults.get(key);
-        if (CONFIG.get(key) == null) {
+        if ()
+        else if (CONFIG.get(key) == null) {
             return defaultVal;
         }
         return CONFIG.get(key);

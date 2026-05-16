@@ -38,13 +38,17 @@ public class Constants {
         public static final double defaultRunSpeed = CONFIG.getDouble("Run Speed");
         public static final int wanderRange = CONFIG.getInt("Wander Range");;
         public static final boolean panic = CONFIG.getBool("Panic When Hurt");
+        public static final float fleeRange = 15.0f;
         // Harvesting
         public static final int searchRange = CONFIG.getInt("Harvest Range");
         public static final int searchRangeVertical = 3;
         public static final double depositDistance = 1.5;
-        public static boolean blockHarvest = CONFIG.getBool("Block Harvesting");
-        public static boolean whitelistHarvest = CONFIG.getBool("Use Whitelist");
-        public static Set<Block> whitelist = constructBlockList(CONFIG.getString("Crop Whitelist"));
+        public static final boolean blockHarvest = CONFIG.getBool("Block Harvesting");
+        public static final boolean whitelistHarvest = CONFIG.getBool("Use Whitelist");
+        public static final Set<Block> whitelist = constructBlockList(CONFIG.getString("Crop Whitelist"));
+        // Aggro
+        public static boolean animalAggro = true;
+        public static final boolean raiderAggro = true;
 
         private static Set<Block> constructBlockList(String list) {
              Set<Block> set = new HashSet<>();
