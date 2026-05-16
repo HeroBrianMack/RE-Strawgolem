@@ -7,6 +7,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
@@ -63,7 +64,11 @@ public class GolemRenderer extends DynamicGeoEntityRenderer<StrawGolem> {
     @Override
     public void actuallyRender(PoseStack poseStack, StrawGolem animatable, BakedGeoModel model, @Nullable RenderType renderType, MultiBufferSource bufferSource, @Nullable VertexConsumer buffer, boolean isReRender, float partialTick, int packedLight, int packedOverlay, int colour) {
         getGeoModel().getAnimationProcessor().getBone("locator");
-
+        if (animatable.shouldShiver()) {
+            double deltaX = animatable.getRandom().nextDouble() * 0.02;
+            double deltaZ = animatable.getRandom().nextDouble() * 0.02;
+            poseStack.translate(deltaX, 0, deltaZ);
+        }
         super.actuallyRender(poseStack, animatable, model, renderType, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, colour);
     }
 
