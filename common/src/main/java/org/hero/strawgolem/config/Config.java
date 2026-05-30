@@ -14,27 +14,36 @@ public class Config {
     private String file = "";
     private Map<String, Object> defaults;
     private ArrayList<Runnable> CONFIG_REBUILD = new ArrayList<>();
-    // Future possibility: Map<Str, Str> rename/migrate
-    private HashMap<String, Map<String, Object>> versionOverrides = new HashMap<>();
-    public Config() {
+    // There could be a way to use TreeMap here and make things more efficient, but this section only runs once.
+    private HashMap<Integer, Map<String, Object>> versionOverrides = new HashMap<>();
+    private boolean newConfigVersion = false;
 
+    public Config() {
         consConfig();
-        if (!CONFIG.getKeys().containsAll(defaults.keySet())) {
+        setVersionOverrides();
+        newConfigVersion = versionOverrides.keySet().stream().anyMatch(v -> v > versionParse());
+        if (!CONFIG.getKeys().containsAll(defaults.keySet()) || newConfigVersion) {
             rebuildConfig();
         }
+
         // No need to have values in the rebuilder/overrider anymore, so just make it null.
         CONFIG_REBUILD = null;
         versionOverrides = null;
-        Constants.LOG.debug("{}", CONFIG.isBroken());
+        if (CONFIG.isBroken()) {
+            Constants.LOG.error("Configuration file is broken!");
+        }
     }
 
     private void setVersionOverrides() {
-        // Version 1.0.0 Overrides:
-        versionOverrides.put("1.0.0",
-                Map.of("Config Version Number", "1.0.0"));
-        versionOverrides.get("1.0.0");
+        // Honestly could simplify this logically to not even bother keeping old overrides,
+        // but just in case users jump up from old versions, I will keep this as such.
+        // Note that this map is Immutable, so do not try to modify the map!
+        // Version 1 Overrides:
+        versionOverrides.put(1,
+                Map.of("Config Version Number", "1"));
         // Version X Overrides:
-        // Mandatory Future Override (version number)
+//        versionOverrides.put(X,
+//                Map.of("Config Version Number", "X"));
     }
 
     private void consConfig() {
@@ -112,48 +121,48 @@ public class Config {
 
     private void metaSection() {
         section("Meta Data");
-        add("Config Version Number", "1.0.0",
+        add("Config Version Number", "1",
                 "Please do not modify this value casually, or risk config values being overwritten " +
                         "or made invalid!");
     }
 
-    private int[] versionParse(String version) {
+    private int versionParse() {
+        // Get current version
+        String version = CONFIG.get("Config Version Number");
         if (version == null) {
-            version = CONFIG.get("Config Version Number");
-        }
-        if (version == null) {
-            return new int[]{0, 0, 0};
+            // Returning 0 as a way of saying this is an unversioned config
+            return 0;
         } else {
             try {
-                String[] split = version.splitWithDelimiters(".", 3);
-                return new int[]{Integer.parseInt(split[0]), Integer.parseInt(split[1]),
-                        Integer.parseInt(split[2])};
+                return Integer.parseInt(version);
             } catch (Exception e) {
-                Constants.LOG.debug("Error parsing config version number : {}", version);
+                Constants.LOG.error("Error parsing config version number : {}", version);
             }
         }
-        // Currently force resets if version num broken. No different from 0, 0, 0 effectively.
+        // Currently force resets if version num broken. No different from 0 effectively.
         // May use as a checker to disable resets?
-        return new int[]{-1, -1, -1};
+        return -1;
     }
 
-    private boolean shouldUpdate(String key) {
-        var currentVersion = versionParse(null);
+    private int updateVersion(String key) {
+        // Grab current version.
+        var currentVersion = versionParse();
+        // Variable just to track the newest version that overrides the key.
+        int newestVersion = -1;
+        // Get all override versions.
         for (var k : versionOverrides.keySet()) {
+            // Now check if the overrides for the version have the key (the config variable).
             if (versionOverrides.get(k).containsKey(key)) {
-                var version = versionParse(k);
-                // (Major version <), or (Major =, Minor <), Or (Major =, Minor =, Mini <).
-                if (version[0] < currentVersion[0]
-                        || (version[0] == currentVersion[0]
-                            && (version[1] < currentVersion[1]
-                                || (version[1] == currentVersion[1]
-                                    && version[2] < currentVersion[2])))) {
-                    return true;
+                // Check that the version is greater than the current version then against
+                // newestVersion to locate max for the key.
+                if (k > currentVersion && k > newestVersion) {
+                    newestVersion = k;
                 }
             }
         }
-        return false;
+        return newestVersion;
     }
+
     // if the custom provider is not specified SimpleConfig will create an empty file instead
     private String provider() {
         // Custom config provider, returns the default config content
@@ -163,10 +172,16 @@ public class Config {
     // Special variation just for rebuilding config.
     private void add(String key, String description) {
         description(description);
-        if (Objects.equals(key, "Golem Hunger Time")) {
-            System.out.println(getObject(key));
-            System.out.println(defaults.keySet());
+        // If the config version has updated.
+        if (newConfigVersion) {
+            // Get the newest update version for this key
+            var update = updateVersion(key);
+            if (update != -1) {
+                add(key, versionOverrides.get(update).get(key));
+                return;
+            }
         }
+        // If there is a new config, but it isn't for this key continue rebuilding as usual.
         add(key, getObject(key));
     }
 
@@ -226,8 +241,7 @@ public class Config {
 
     public Object getObject(String key) {
         Object defaultVal = defaults.get(key);
-        if ()
-        else if (CONFIG.get(key) == null) {
+        if (CONFIG.get(key) == null) {
             return defaultVal;
         }
         return CONFIG.get(key);
