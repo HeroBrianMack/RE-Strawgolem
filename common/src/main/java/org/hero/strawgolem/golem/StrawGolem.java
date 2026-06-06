@@ -96,7 +96,6 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
 //        walk = defaultWalkSpeed;
         double run = Golem.defaultRunSpeed;
 //        run = Golem.defaultRunSpeed;
-        Constants.LOG.error("AGH: " + run + " " + walk);
 
         goalSelector.addGoal(1, new GolemAvoidEntityGoal<>(this, Pillager.class,
                 (e) -> e.getTarget() instanceof StrawGolem, Golem.fleeRange, walk, run, EntitySelector.NO_CREATIVE_OR_SPECTATOR));
@@ -366,7 +365,7 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
 
     private boolean isInRain() {
         BlockPos blockpos = this.blockPosition();
-        return this.level().isRainingAt(blockpos) || this.level().isRainingAt(BlockPos.containing((double)blockpos.getX(), this.getBoundingBox().maxY, (double)blockpos.getZ()));
+        return this.level().isRainingAt(blockpos) || this.level().isRainingAt(BlockPos.containing(blockpos.getX(), this.getBoundingBox().maxY, blockpos.getZ()));
     }
 
     private boolean isCold() {
@@ -375,7 +374,7 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
 
     // May make barrel ignore cold shivering?
     public boolean shouldShiver() {
-        return true|| isInWaterOrBubble() || isInPowderSnow || (isInRain() && !hasHat()) || isCold();
+        return isInWaterOrBubble() || isInPowderSnow || (!hasHat() && isInRain()) || isCold();
     }
 
     public boolean shouldForceAnimationReset() {
@@ -418,6 +417,25 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
      */
     public int getLifeSpan() {
         return entityData.get(LIFE_SPAN);
+    }
+
+    /**
+     * Determines how harsh a golem's environment is.
+     * This will be used for GolemLifeSpan calculations.
+     * @return The harshness value of the environment.
+     */
+    public float getEnvironmentHarshness() {
+        float harsh = 1.0f;
+        if (isInWaterOrBubble()) {
+            harsh++;
+        }
+        if (isInPowderSnow || isCold()) {
+            harsh -= 0.5f;
+        }
+        if (isInRain() && !hasHat()) {
+            harsh++;
+        }
+        return harsh;
     }
 
     public boolean getPanic() {

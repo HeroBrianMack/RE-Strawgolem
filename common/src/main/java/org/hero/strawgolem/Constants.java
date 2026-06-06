@@ -31,6 +31,7 @@ public class Constants {
         public static final Set<Item> repairItem = constructItemList(CONFIG.getString("Repair Item"));
         public static final boolean shiver = CONFIG.getBool("Shiver");
         public static final boolean dynamicDecay = CONFIG.getBool("Environmental Decay");
+        public static final boolean lifeVariation = CONFIG.getBool("Lifespan Variation");
 
         // Movement
         public static final double defaultMovement = 0.23;
