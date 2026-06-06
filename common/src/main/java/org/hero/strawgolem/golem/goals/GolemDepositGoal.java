@@ -63,7 +63,8 @@ public class GolemDepositGoal extends GolemMoveToBlockGoal {
 
     @Override
     public boolean canUse() {
-        if (blockPos == null) {
+        if (blockPos == null || !ContainerHelper.isContainer(golem, blockPos)
+                || !VisionHelper.canSee(golem, blockPos)) {
             blockPos = golem.deliverer.getDeliverable();
         }
         return mob.hasItemInSlot(EquipmentSlot.MAINHAND)
