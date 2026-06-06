@@ -26,7 +26,7 @@ public class GolemArmAnimationController extends AnimationController<StrawGolem>
         if (controller.getAnimationState().equals(State.STOPPED)) {
             controller.forceAnimationReset();
         }
-        if (golem.isScared()) {
+        if (golem.getPanic()) {
             controller.setAnimation(arms[5]);
         } else if (golem.holdItemAbove()) {
             controller.setAnimation(arms[4]);

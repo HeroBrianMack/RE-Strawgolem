@@ -14,7 +14,6 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.PanicGoal;
 import net.minecraft.world.entity.animal.AbstractGolem;
@@ -27,7 +26,6 @@ import net.minecraft.world.entity.projectile.Snowball;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
-import org.hero.strawgolem.Constants;
 import org.hero.strawgolem.client.GolemArmAnimationController;
 import org.hero.strawgolem.client.GolemHarvestAnimationController;
 import org.hero.strawgolem.client.GolemLegAnimationController;
@@ -51,7 +49,6 @@ import software.bernie.geckolib.util.RenderUtil;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.List;
-import java.util.Queue;
 
 import static org.hero.strawgolem.Constants.*;
 
@@ -69,6 +66,7 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
     public static final float baseHealth = Golem.maxHealth;
     private static final EntityDataAccessor<Boolean> HAT = SynchedEntityData.defineId(StrawGolem.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> FESTIVE = SynchedEntityData.defineId(StrawGolem.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> PANIC = SynchedEntityData.defineId(StrawGolem.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Integer> CARRY_STATUS = SynchedEntityData.defineId(StrawGolem.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> PICKUP_STATUS = SynchedEntityData.defineId(StrawGolem.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> BARREL = SynchedEntityData.defineId(StrawGolem.class, EntityDataSerializers.INT);
@@ -79,7 +77,6 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
 
     private boolean forceAnimationReset = false;
     public boolean createSnow = false;
-    private boolean panic = false;
     @Override
     protected void registerGoals() {
         goalSelector.addGoal(0, new FloatGoal(this));
@@ -114,6 +111,7 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
         pBuilder.define(PICKUP_STATUS, 0);
         pBuilder.define(HAT, false);
         pBuilder.define(FESTIVE, false);
+        pBuilder.define(PANIC, false);
         pBuilder.define(BARREL, 0);
         pBuilder.define(HUNGER, 0);
         pBuilder.define(LIFE_SPAN, 0);
@@ -146,7 +144,10 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
     public void tick() {
         // Tick each feature
         // May need to push all of these onto serverSide
-        if (!level().isClientSide && isAlive()) features.forEach(IGolemTickFeature::tick);
+        if (!level().isClientSide && isAlive())  {
+            features.forEach(IGolemTickFeature::tick);
+            setPanic(isRunningScaredGoal());
+        }
         Item item = getMainHandItem().getItem();
         if (item instanceof BlockItem && !(item instanceof ItemNameBlockItem)) setCarryStatus(2);
         else if (!getMainHandItem().isEmpty()) setCarryStatus(1);
@@ -234,6 +235,8 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
         // Hat!
         this.entityData.set(HAT, tag.getBoolean("hat"));
         this.entityData.set(FESTIVE, tag.getBoolean("festive"));
+        // I don't think it's necessary to keep golem panicking?
+//        this.entityData.set(PANIC, tag.getBoolean("panic"));
         this.entityData.set(CARRY_STATUS, tag.getInt("carry"));
         // Barrel!
         this.entityData.set(BARREL, tag.getInt("barrelHP"));
@@ -335,10 +338,6 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
         }
     }
 
-    public boolean isScared() {
-        return false;
-    }
-
     public boolean holdItemAbove() {
         return carryStatus() == 2 || hasBarrel();
     }
@@ -438,12 +437,28 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
         return harsh;
     }
 
+    /**
+     * This method checks if the running goal would make the golem be scared.
+     * @return Whether the running goal is a fear causing one.
+     */
+    private boolean isRunningScaredGoal() {
+        for (var goal : this.goalSelector.getAvailableGoals()) {
+            if (goal.getGoal() instanceof PanicGoal || goal.getGoal() instanceof GolemAvoidEntityGoal<?>) {
+                if (goal.isRunning()) {
+                    return true;
+                }
+            }
+
+        }
+        return false;
+    }
+
     public boolean getPanic() {
-        return panic;
+        return entityData.get(PANIC);
     }
 
     public void setPanic(boolean panic) {
-        this.panic = panic;
+        entityData.set(PANIC, panic);
     }
 
     // ToDo: Move this out of StrawGolem, it can simply be in GolemDepositGoal.

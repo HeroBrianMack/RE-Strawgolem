@@ -35,17 +35,10 @@ public class GolemAvoidEntityGoal<T extends LivingEntity> extends AvoidEntityGoa
     @Override
     public void start() {
         super.start();
-        Constants.LOG.error("AGH: " + tmp1 + " " + tmp2);
-        if (mob instanceof StrawGolem golem) {
-            golem.setPanic(true);
-        }
     }
 
     @Override
     public void stop() {
         super.stop();
-        if (mob instanceof StrawGolem golem) {
-            golem.setPanic(false);
-        }
     }
 }
