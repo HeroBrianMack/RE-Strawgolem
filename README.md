@@ -20,7 +20,7 @@ Once a Straw Golem harvests a crop, it will seek out somewhere to store the item
 - Your golem is usually clever enough to locate an available storage on its own. 
 - If you have more than one storage in the vicinity, the golem will choose one on its own.
 - You can designate the storage for a golem to use by shift right clicking on the golem, and then doing the same on a storage.
-- The golem will use it as long as it's within the golem's range. [See Config](https://github.com/HeroBrianMack/RE-Strawgolem/new/master?filename=README.md#config)
+- The golem will use it as long as it's within the golem's range. [See Config](https://github.com/HeroBrianMack/RE-Strawgolem/tree/master#Config)
 
 ## Golem Life
 - You can dress up your golem with a dapper straw hat.
