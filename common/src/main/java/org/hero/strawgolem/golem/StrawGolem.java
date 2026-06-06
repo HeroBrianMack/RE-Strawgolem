@@ -93,14 +93,14 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
 //        walk = defaultWalkSpeed;
         double run = Golem.defaultRunSpeed;
 //        run = Golem.defaultRunSpeed;
-
-        goalSelector.addGoal(1, new GolemAvoidEntityGoal<>(this, Pillager.class,
+        int prio = 1;
+        goalSelector.addGoal(prio, new GolemAvoidEntityGoal<>(this, Pillager.class,
                 (e) -> e.getTarget() instanceof StrawGolem, Golem.fleeRange, walk, run, EntitySelector.NO_CREATIVE_OR_SPECTATOR));
-        goalSelector.addGoal(1, new GolemAvoidEntityGoal<>(this, Sheep.class,
+        goalSelector.addGoal(prio, new GolemAvoidEntityGoal<>(this, Sheep.class,
                 (e) -> e.getTarget() instanceof StrawGolem, Golem.fleeRange, walk, run, EntitySelector.NO_CREATIVE_OR_SPECTATOR));
-        goalSelector.addGoal(1, new GolemAvoidEntityGoal<>(this, Cow.class,
+        goalSelector.addGoal(prio, new GolemAvoidEntityGoal<>(this, Cow.class,
                 (e) -> e.getTarget() instanceof StrawGolem, Golem.fleeRange, walk, run, EntitySelector.NO_CREATIVE_OR_SPECTATOR));
-        goalSelector.addGoal(1, new GolemAvoidEntityGoal<>(this, Pig.class,
+        goalSelector.addGoal(prio, new GolemAvoidEntityGoal<>(this, Pig.class,
                 (e) -> e.getTarget() instanceof StrawGolem, Golem.fleeRange, walk, run, EntitySelector.NO_CREATIVE_OR_SPECTATOR));
     }
 
