@@ -8,6 +8,7 @@ public class GolemLifespanFeature implements IGolemTickFeature {
     private int waitTime = 20;
     private int counter = 0;
     private StrawGolem golem;
+    private boolean first = false;
 
     /**
      * Constructor for the Golem Life Span Feature
@@ -22,27 +23,36 @@ public class GolemLifespanFeature implements IGolemTickFeature {
      * the Straw Golem's life span will increment by one.
      */
     public void tick() {
-        if (golem.getLifeSpan() >= Constants.Golem.maxLife) {
-            // Kill golem if its lived past its maximum lifespan
-            golem.kill();
-            return;
-        } else if (golem.getLifeSpan() < 0) {
-            // Should never trigger, but better to be cautious
-            // May have it simply kill the golem if it goes negative, but for now just reset.
-            golem.setLifeSpan(0);
-        }
-        counter++;
-        // Not efficient math, can address if necessary.
-        if (counter >= (Constants.Golem.dynamicDecay ?
-                waitTime / (golem.getEnvironmentHarshness()) : waitTime)) {
-            // If there's no variation continue as usual, otherwise give the golem a 90% to decay.
-            if (!Constants.Golem.lifeVariation || golem.getRandom().nextFloat() < 0.9) {
-                // Increment life by 1 second.
-                golem.setLifeSpan(golem.getLifeSpan() + 1);
+        if (Constants.Golem.lifespan) {
+            if (golem.getLifeSpan() >= Constants.Golem.maxLife) {
+                // Kill golem if its lived past its maximum lifespan
+                golem.kill();
+                return;
+            } else if (golem.getLifeSpan() < 0) {
+                // Should never trigger, but better to be cautious
+                // May have it simply kill the golem if it goes negative, but for now just reset.
+                golem.setLifeSpan(0);
             }
-            counter = 0;
+            counter++;
+            // Not efficient math, can address if necessary.
+            if (counter >= (Constants.Golem.dynamicDecay ?
+                    waitTime / (golem.getEnvironmentHarshness()) : waitTime)) {
+                // If there's no variation continue as usual, otherwise give the golem a 90% to decay.
+                if (!Constants.Golem.lifeVariation || golem.getRandom().nextFloat() < 0.9) {
+                    // Increment life by 1 second.
+                    golem.setLifeSpan(golem.getLifeSpan() + 1);
+                }
+                counter = 0;
+            }
+            updateGolemHealth();
+        } else if (first) {
+            first = false;
+            var attr = golem.getAttribute(Attributes.MAX_HEALTH);
+            if (attr != null) {
+                // Normalizing healthRatio, since I don't want Golems over-healthed.
+                attr.setBaseValue(Constants.Golem.maxHealth);
+            }
         }
-        updateGolemHealth();
     }
 
     /**
@@ -60,8 +70,8 @@ public class GolemLifespanFeature implements IGolemTickFeature {
         healthRatio += divisibility + epsilon;
         var attr = golem.getAttribute(Attributes.MAX_HEALTH);
         if (attr != null) {
-            // Normalizing speedRatio, since I don't want Golems moving triple speed.
-            attr.setBaseValue(Constants.Golem.maxHealth * Math.min(divisibility, healthRatio / divisibility));
+            // Normalizing healthRatio, since I don't want Golems over-healthed.
+            attr.setBaseValue(Constants.Golem.maxHealth * Math.min(1.0f, healthRatio / divisibility));
         } else {
             // Should never trigger, but best to be safe.
             Constants.LOG.error("Golem missing Attribute: {}!", "Max Health");

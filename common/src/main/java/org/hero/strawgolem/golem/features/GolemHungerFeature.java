@@ -8,6 +8,7 @@ public class GolemHungerFeature implements IGolemTickFeature {
     private int waitTime = 20;
     private int counter = 0;
     private StrawGolem golem;
+    private boolean first = true;
 
     /**
      * Constructor for the Golem Hunger Feature
@@ -24,19 +25,28 @@ public class GolemHungerFeature implements IGolemTickFeature {
      * the Straw Golem's hunger will increment by one.
      */
     public void tick() {
-        if (golem.getHunger() >= Constants.Golem.maxHunger) {
+        if (Constants.Golem.hunger) {
+            if (golem.getHunger() >= Constants.Golem.maxHunger) {
+                updateGolemSpeed();
+                return;
+            } else if (golem.getHunger() < 0) {
+                // Should never trigger, but better to be cautious
+                golem.setHunger(0);
+            }
+            counter++;
+            if (counter == waitTime) {
+                golem.setHunger(golem.getHunger() + 1);
+                counter = 0;
+            }
             updateGolemSpeed();
-            return;
-        } else if (golem.getHunger() < 0) {
-            // Should never trigger, but better to be cautious
-            golem.setHunger(0);
+        } else if (first) {
+            first = false;
+            var attr = golem.getAttribute(Attributes.MOVEMENT_SPEED);
+            if (attr != null) {
+                // Normalizing speedRatio, since I don't want Golems moving triple speed.
+                attr.setBaseValue(Constants.Golem.defaultMovement);
+            }
         }
-        counter++;
-        if (counter == waitTime) {
-            golem.setHunger(golem.getHunger() + 1);
-            counter = 0;
-        }
-        updateGolemSpeed();
     }
 
     /**
