@@ -26,7 +26,7 @@ public class MixinPillager extends Mob {
 
     @Inject(method = "registerGoals", at = @At("TAIL"))
     private void registerGoals(CallbackInfo ci) {
-        if (Constants.Golem.animalAggro) {
+        if (Constants.Golem.raiderAggro) {
             this.targetSelector.addGoal(3, // ToDo: Check if <> breaks anything, it should be fine.
                     new NearestAttackableTargetGoal<>((Pillager)(Object)this, StrawGolem.class, true));
         }
