@@ -11,6 +11,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
+import org.hero.strawgolem.Constants;
 import org.hero.strawgolem.client.particle.SimplerParticleType;
 import org.hero.strawgolem.golem.StrawGolem;
 import org.jetbrains.annotations.Nullable;
@@ -64,7 +65,7 @@ public class GolemRenderer extends DynamicGeoEntityRenderer<StrawGolem> {
     @Override
     public void actuallyRender(PoseStack poseStack, StrawGolem animatable, BakedGeoModel model, @Nullable RenderType renderType, MultiBufferSource bufferSource, @Nullable VertexConsumer buffer, boolean isReRender, float partialTick, int packedLight, int packedOverlay, int colour) {
         getGeoModel().getAnimationProcessor().getBone("locator");
-        if (animatable.shouldShiver()) {
+        if (Constants.Golem.shiver && animatable.shouldShiver()) {
             double deltaX = animatable.getRandom().nextDouble() * 0.02;
             double deltaZ = animatable.getRandom().nextDouble() * 0.02;
             poseStack.translate(deltaX, 0, deltaZ);
