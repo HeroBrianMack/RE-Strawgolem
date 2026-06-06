@@ -80,12 +80,14 @@ public class Config {
         add("Lifespan", false, "Whether a golem should have a lifespan.");
         add("Lifespan Time", 4800, "The time in seconds " +
                 "that a Straw Golem will have as a natural lifespan in a default environment.");
-        add("Repair Item", "minecraft:wheat", "The item(s) a golem is repaired with.");
-        add("Shiver", true, "Whether a golem should shiver in response to environmental factors " +
-                "such as rain and cold biomes.");
+        add("Lifespan Variation", true, "Whether golems should have variation " +
+                "in their lifespans.");
         add("Environmental Decay", false, "Whether a golem should age faster or slower" +
                 " in response to environmental factors, examples being:\n# A golem in rain or water will age faster, " +
                 "whereas a golem in cold biomes will age slower.");
+        add("Repair Item", "minecraft:wheat", "The item(s) a golem is repaired with.");
+        add("Shiver", true, "Whether a golem should shiver in response to environmental factors " +
+                "such as rain and cold biomes.");
     }
 
     /**
