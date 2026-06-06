@@ -155,8 +155,6 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
         super.tick();
     }
 
-    // ToDo: Confirm glitch's continued existence.
-// seems to have an item dupe glitch...
     @Override
     protected InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
         if (level().isClientSide) return InteractionResult.PASS;
@@ -166,7 +164,7 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
             if (item.is(Items.BARREL) && barrelHP() != Golem.barrelHealth) {
                 entityData.set(BARREL, Golem.barrelHealth);
                 item.shrink(1);
-            } else if (item.is(Items.WHEAT) && healthStatus() != 0) {
+            } else if (Golem.repairItem.contains(item.getItem()) && healthStatus() != 0) {
                 // Decreasing life span by life a third of max life span to a minimum of 0.
                 setLifeSpan(Math.max(0, getLifeSpan() - Golem.maxLife / 3));
                 // Updating the golem's max health
@@ -178,13 +176,20 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
                 }
                 this.playSound(SoundRegistry.GOLEM_INTERESTED.get());
                 item.shrink(1);
-            } else if (item.is(ItemRegistry.STRAW_HAT.get()) && !hasHat()) {
+            } else if (Golem.foodItem.contains(item.getItem()) && getHunger() > Golem.maxHunger / 5) {
+                // Decreasing life span by life a third of max life span to a minimum of 0.
+                setHunger(Math.max(0, getHunger() - Golem.maxHunger / 3));
+                // Updating the golem's max health
+                hunger.refresh();
+                this.playSound(SoundRegistry.GOLEM_INTERESTED.get());
+                item.shrink(1);
+            }
+            else if (item.is(ItemRegistry.STRAW_HAT.get()) && !hasHat()) {
                 entityData.set(HAT, true);
                 this.playSound(SoundRegistry.GOLEM_INTERESTED.get());
             } else if (item.is(Items.BRUSH)) {
                 this.playSound(SoundRegistry.GOLEM_HAPPY.get());
                 entityData.set(FESTIVE, false);
-
             }
             return InteractionResult.CONSUME;
         } else if (pHand == InteractionHand.MAIN_HAND
