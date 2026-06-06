@@ -6,7 +6,7 @@ To download, head on over to either [CurseForge](https://www.curseforge.com/mine
 
 | <img src="https://github.com/user-attachments/assets/75ef0baf-33f6-48b3-a39d-7f2840b048de" width="400" height="400" alt="Winter event strawgolem 2025"> |
 |:--:|
-| *Winter Event 2025 (December-January)* |
+| *Winter Event 2025 (December-January (Northern), July-August (Southern))* |
 
 | ![Strawgolem holding wheat](https://github.com/HeroBrianMack/RE-Strawgolem/blob/master/common/src/main/resources/strawgolem.png) | 
 |:--:| 
@@ -20,7 +20,7 @@ Once a Straw Golem harvests a crop, it will seek out somewhere to store the item
 - Your golem is usually clever enough to locate an available storage on its own. 
 - If you have more than one storage in the vicinity, the golem will choose one on its own.
 - You can designate the storage for a golem to use by shift right clicking on the golem, and then doing the same on a storage.
-- The golem will use it as long as it's within the golem's range. [See Config](https://github.com/HeroBrianMack/RE-Strawgolem/new/master?filename=README.md#config)
+- The golem will use it as long as it's within the golem's range. [See Config](https://github.com/HeroBrianMack/RE-Strawgolem/tree/master#Config)
 
 ## Golem Life
 - You can dress up your golem with a dapper straw hat.
@@ -37,7 +37,26 @@ The mod is made to be fairly configurable, with more configuration options plann
 #### The max health of a golem.
 Max Health=6.0
 #### The max health of a barrel.
-Barrel Max Health=100.0
+Barrel Max Health=100
+#### Whether a golem should have hunger.
+Hunger=false
+#### The time in seconds it takes for a Straw Golem to become fully hungry.
+Hunger Time=60
+#### The item(s) a golem is fed with.
+Food Item=minecraft:apple
+#### Whether a golem should have a lifespan.
+Lifespan=false
+#### The time in seconds that a Straw Golem will have as a natural lifespan in a default environment.
+Lifespan Time=4800
+#### Whether golems should have variation in their lifespans.
+Lifespan Variation=true
+#### Whether a golem should age faster or slower in response to environmental factors, examples being:
+#### A golem in rain or water will age faster, whereas a golem in cold biomes will age slower.
+Environmental Decay=false
+#### The item(s) a golem is repaired with.
+Repair Item=minecraft:wheat
+#### Whether a golem should shiver in response to environmental factors such as rain and cold biomes.
+Shiver=true
 ### [Golem Movement]
 #### The walk speed of a golem.
 Walk Speed=0.5
@@ -45,24 +64,36 @@ Walk Speed=0.5
 Run Speed=0.8
 #### How far a golem can wander
 Wander Range=24
-#### Whether a golem should panic when hurt.
-Panic When Hurt=true
+#### Whether a golem should panic when threatened.
+Panic=true
+#### How far a golem can flee
+Flee Range=15.0
 ### [Golem Harvesting]
 #### Range for a golem to detect crops and chests.
 Harvest Range=24
 #### Whether a golem should harvest crop blocks like pumpkins and melons.
 Block Harvesting=true
 #### Whether a golem should only harvest crops in the whitelist.
-Use Whitelist=false
+Use Whitelist=true
 #### What crops should be harvested, please use valid resource locations.
 Crop Whitelist=minecraft:wheat minecraft:potato
-  
+### [Miscellaneous]
+#### Whether animals should try to attack Straw Golems
+Hungry Animals=true
+#### Whether pillagers should try to attack Straw Golems
+Angry Pillagers=true
+#### For determining season-based timings. Acceptable values are: North, South, None. Note: None will disable seasonal events.
+Hemisphere=South
+### [Metadata]
+#### Please do not modify this value casually, or risk config values being overwritten or made invalid!
+Config Version Number=1
+
 ## Compatibility
 This mod should work with most modded crops without any modification, if there are any mods where it doesn't let me know and I will fix it quickly!
 
 ## Downloads
 Download here:
-- [CurseForge](https://www.curseforge.com/minecraft/mc-mods/straw-golem-rebaled-ported)
+- [CurseForge](https://www.curseforge.com/minecraft/mc-mods/straw-golem-rebaled-updated)
 - [Modrinth](https://modrinth.com/mod/straw-golem-rebaled-updated)
 # Support Me
 Nothing for now :)
