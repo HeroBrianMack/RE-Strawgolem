@@ -32,8 +32,14 @@ public class GolemLifespanFeature implements IGolemTickFeature {
             golem.setLifeSpan(0);
         }
         counter++;
-        if (counter == waitTime) {
-            golem.setLifeSpan(golem.getLifeSpan() + 1);
+        // Not efficient math, can address if necessary.
+        if (counter >= (Constants.Golem.dynamicDecay ?
+                waitTime / (golem.getEnvironmentHarshness()) : waitTime)) {
+            // If there's no variation continue as usual, otherwise give the golem a 90% to decay.
+            if (!Constants.Golem.lifeVariation || golem.getRandom().nextFloat() < 0.9) {
+                // Increment life by 1 second.
+                golem.setLifeSpan(golem.getLifeSpan() + 1);
+            }
             counter = 0;
         }
         updateGolemHealth();
