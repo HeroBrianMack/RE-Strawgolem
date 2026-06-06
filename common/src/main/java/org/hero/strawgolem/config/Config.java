@@ -54,6 +54,7 @@ public class Config {
         golemHealthSection();
         golemMovementSection();
         golemHarvestingSection();
+        miscSection();
         metaSection();
         CONFIG = SimpleConfig.of("strawgolem").provider(this::provider)
                 .request();
@@ -100,8 +101,9 @@ public class Config {
         add("Run Speed", 0.8,
                 "The run speed of a golem.");
         add("Wander Range", 24, "How far a golem can wander");
-        add("Panic When Hurt", true,
-                "Whether a golem should panic when hurt.");
+        add("Panic", true,
+                "Whether a golem should panic when threatened.");
+        add("Flee Range", 15.0f, "How far a golem can flee");
     }
 
     /**
@@ -121,8 +123,22 @@ public class Config {
                         + " please use valid resource locations.");
     }
 
+    /**
+     * Method that handles the MetaData Section of the Config.
+     */
+    private void miscSection() {
+        section("Miscellaneous");
+        add("Hungry Animals", true, "Whether animals should try to attack Straw Golems");
+        add("Angry Pillagers", true, "Whether pillagers should try to attack Straw Golems");
+        add("Hemisphere", "North", "For determining season-based timings. Acceptable values are:" +
+                " North, South, None. Note: None will disable seasonal events.");
+    }
+
+    /**
+     * Method that handles the Metadata Section of the Config.
+     */
     private void metaSection() {
-        section("Meta Data");
+        section("Metadata");
         add("Config Version Number", "1",
                 "Please do not modify this value casually, or risk config values being overwritten " +
                         "or made invalid!");

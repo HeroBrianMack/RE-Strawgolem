@@ -25,8 +25,10 @@ public class Constants {
         // Health
         public static final float maxHealth = CONFIG.getFloat("Max Health");
         public static final int barrelHealth = CONFIG.getInt("Barrel Max Health");
+        public static final boolean hunger = CONFIG.getBool("Hunger");
         public static final int maxHunger = CONFIG.getInt("Hunger Time");
         public static final Set<Item> foodItem = constructItemList(CONFIG.getString("Food Item"));
+        public static final boolean lifespan = CONFIG.getBool("Lifespan");
         public static final int maxLife = CONFIG.getInt("Lifespan Time");
         public static final Set<Item> repairItem = constructItemList(CONFIG.getString("Repair Item"));
         public static final boolean shiver = CONFIG.getBool("Shiver");
@@ -38,8 +40,8 @@ public class Constants {
         public static final double defaultWalkSpeed = CONFIG.getDouble("Walk Speed");
         public static final double defaultRunSpeed = CONFIG.getDouble("Run Speed");
         public static final int wanderRange = CONFIG.getInt("Wander Range");;
-        public static final boolean panic = CONFIG.getBool("Panic When Hurt");
-        public static final float fleeRange = 15.0f;
+        public static final boolean panic = CONFIG.getBool("Panic");
+        public static final float fleeRange = CONFIG.getFloat("Flee Range");
         // Harvesting
         public static final int searchRange = CONFIG.getInt("Harvest Range");
         public static final int searchRangeVertical = 3;
@@ -47,9 +49,10 @@ public class Constants {
         public static final boolean blockHarvest = CONFIG.getBool("Block Harvesting");
         public static final boolean whitelistHarvest = CONFIG.getBool("Use Whitelist");
         public static final Set<Block> whitelist = constructBlockList(CONFIG.getString("Crop Whitelist"));
-        // Aggro
-        public static boolean animalAggro = true;
-        public static final boolean raiderAggro = true;
+        // Misc
+        public static boolean animalAggro = CONFIG.getBool("Hungry Animals");
+        public static final boolean raiderAggro = CONFIG.getBool("Angry Pillagers");
+        public static final String hemisphere = CONFIG.getString("Hemisphere");
 
         private static Set<Block> constructBlockList(String list) {
              Set<Block> set = new HashSet<>();

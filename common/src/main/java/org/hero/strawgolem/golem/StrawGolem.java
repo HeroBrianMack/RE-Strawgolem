@@ -303,7 +303,8 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
     // ToDo: Handle hemisphere, likely config based
     private boolean isHoliday() {
         Month month = LocalDate.now().getMonth();
-        return month == Month.DECEMBER || month == Month.JANUARY;
+        return (Golem.hemisphere.equals("North") && (month == Month.DECEMBER || month == Month.JANUARY))
+        || (Golem.hemisphere.equals("South") && (month == Month.JULY || month == Month.AUGUST));
     }
 
     /**
@@ -454,7 +455,7 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
     }
 
     public boolean getPanic() {
-        return entityData.get(PANIC);
+        return Golem.panic && entityData.get(PANIC);
     }
 
     public void setPanic(boolean panic) {
