@@ -6,6 +6,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.Container;
 import net.minecraft.world.InteractionHand;
@@ -164,6 +165,24 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
     }
 
     @Override
+    protected void dropAllDeathLoot(ServerLevel pLevel, DamageSource pDamageSource) {
+        super.dropAllDeathLoot(pLevel, pDamageSource);
+        if (hasHat()) {
+            this.spawnAtLocation(ItemRegistry.STRAW_HAT.get());
+        }
+    }
+
+    @Override
+    protected void dropEquipment() {
+        super.dropEquipment();
+        ItemStack itemstack = this.getItemBySlot(EquipmentSlot.MAINHAND);
+        if (!itemstack.isEmpty()) {
+            this.spawnAtLocation(itemstack);
+            this.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
+        }
+    }
+
+    @Override
     public void tick() {
         // Tick each feature
         // May need to push all of these onto serverSide
@@ -172,7 +191,12 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
                 playSound(SoundRegistry.GOLEM_AMBIENT.get());
             }
             features.forEach(IGolemTickFeature::tick);
-            setPanic(isRunningScaredGoal());
+            if (Golem.panic) {
+                setPanic(isRunningScaredGoal());
+                if (getPanic()) {
+                    dropEquipment();
+                }
+            }
         }
         // Get the Straw Golem's held item.
         Item item = getMainHandItem().getItem();
