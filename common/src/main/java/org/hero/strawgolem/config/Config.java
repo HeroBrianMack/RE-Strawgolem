@@ -280,12 +280,11 @@ public class Config {
             }
             return Double.parseDouble((String) getObject(key));
         } catch (Throwable e) {
-            Constants.LOG.error(e.getMessage());
+            Constants.LOG.error("{}  {}", key, e.getMessage());
             try {
                 return (Double) defaults.get(key);
             } catch (Throwable q) {
-                Constants.LOG.error(q.getMessage());
-
+                Constants.LOG.error("{} {}", key, q.getMessage());
             }
         }
         return 1.0;
@@ -301,11 +300,11 @@ public class Config {
             }
             return Float.parseFloat((String) val);
         } catch (Throwable e) {
-            Constants.LOG.error(e.getMessage());
+            Constants.LOG.error("{}  {}", key, e.getMessage());
             try {
                 return (Float) defaults.get(key);
             } catch (Throwable q) {
-                Constants.LOG.error(q.getMessage());
+                Constants.LOG.error("{} {}", key, q.getMessage());
 
             }
         }
@@ -315,34 +314,21 @@ public class Config {
     public int getInt(String key) {
         try {
             Object val = getObject(key);
-            System.out.println("AZ1");
             if (val == null) {
                 return 1;
             } else if (val instanceof Integer i) {
                 return i;
             }
-            System.out.println("AZURE2 " + val);
-
             return Integer.parseInt((String) val);
         } catch (Throwable e) {
-            System.out.println("AZURE3");
-
-            Constants.LOG.error(key + "  " + e.getMessage());
+            Constants.LOG.error("{}  {}", key, e.getMessage());
             try {
-                System.out.println("AZURE4");
-                System.out.println("" + defaults.get(key));
-                System.out.println(Integer.parseInt("" + defaults.get(key)));
-
                 return (Integer) defaults.get(key);
 
             } catch (Throwable q) {
-                System.out.println("AZURE5");
-
                 Constants.LOG.error("{} {}", key, q.getMessage());
             }
         }
-        System.out.println("AZURE6");
-
         return 1;
     }
 
@@ -356,11 +342,11 @@ public class Config {
             }
             return Boolean.parseBoolean((String) val);
         } catch (Throwable e) {
-            Constants.LOG.error(key +  " " + e.getMessage());
+            Constants.LOG.error("{} {}", key, e.getMessage());
             try {
                 return (Boolean) defaults.get(key);
             } catch (Throwable q) {
-                Constants.LOG.error(key+ " " +q.getMessage());
+                Constants.LOG.error("{} {}", key, q.getMessage());
             }
         }
         return false;
@@ -374,11 +360,11 @@ public class Config {
             }
             return (String) val;
         } catch (Throwable e) { // This catch should never be possible!
-            Constants.LOG.error(e.getMessage());
+            Constants.LOG.error("{} {}", key, e.getMessage());
             try {
                 return (String) defaults.get(key);
             } catch (Throwable q) {
-                Constants.LOG.error(q.getMessage());
+                Constants.LOG.error("{} {}", key, q.getMessage());
 
             }
         }
