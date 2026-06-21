@@ -659,10 +659,17 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
     // ToDo: Move this out of StrawGolem, it can simply be in GolemDepositGoal.
     public class Deliverer {
         BlockPos storagePos;
+        BiPredicate<BlockPos> predicate = (gol, pos) ->
+                VisionHelper.canSee(gol, pos) && ContainerHelper.isContainer(gol, pos) && ReachHelper.canPath(gol, pos);
+
+        public boolean shouldChangeDeliverable(BlockPos pos) {
+            // This is a XOR, basically:
+            // if exactly one of these are true, return true else, return false.
+            return pos.equals(getPriorityPos()) ^ predicate.filter(StrawGolem.this, getPriorityPos());
+        }
+
         public BlockPos getDeliverable() {
             StrawGolem golem = StrawGolem.this;
-//            BiPredicate<StrawGolem, BlockPos> = new BiPredicate<>((U, T) -> VisionHelper.canSee(U, T));
-            BiPredicate<BlockPos> predicate = (gol, pos) -> VisionHelper.canSee(gol, pos) && ContainerHelper.isContainer(gol, pos) && ReachHelper.canPath(gol, pos);
             // Checking the player-bound position first.
             if (getPriorityPos().getX() != Integer.MAX_VALUE && predicate.filter(golem, getPriorityPos())) {
                 return getPriorityPos();
