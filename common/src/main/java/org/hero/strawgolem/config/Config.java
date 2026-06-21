@@ -21,7 +21,9 @@ public class Config {
     public Config() {
         consConfig();
         setVersionOverrides();
+        // Whether there is an update to the config version (mandatory config overrides essentially).
         newConfigVersion = versionOverrides.keySet().stream().anyMatch(v -> v > versionParse());
+        // If there is a missing config or a config update, rebuild the config.
         if (!CONFIG.getKeys().containsAll(defaults.keySet()) || newConfigVersion) {
             rebuildConfig();
         }
@@ -51,6 +53,7 @@ public class Config {
         section("Strawgolem Config");
         CONFIG_REBUILD.add(() -> file += "\n");
         file += "\n";
+        // The sections of the config.
         golemHealthSection();
         golemMovementSection();
         golemHarvestingSection();
