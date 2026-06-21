@@ -35,7 +35,7 @@
   },
   "golem_happy": {
     "category": "neutral",
-    "subtitle": "strawgolem.subtitle.golemHeal",
+    "subtitle": "strawgolem.subtitle.golemHappy",
     "sounds": [
       "strawgolem:strawgolem-happy1",
       "strawgolem:strawgolem-happy2",
