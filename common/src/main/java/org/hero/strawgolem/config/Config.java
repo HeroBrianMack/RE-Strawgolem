@@ -272,14 +272,17 @@ public class Config {
 
     public double getDouble(String key) {
         try {
-            if (getObject(key) == null) {
+            Object val = getObject(key);
+            if (val == null) {
                 return 1.0;
+            } else if (val instanceof Double d) {
+                return d;
             }
             return Double.parseDouble((String) getObject(key));
         } catch (Throwable e) {
             Constants.LOG.error(e.getMessage());
             try {
-                return Double.parseDouble((String) defaults.get(key));
+                return (Double) defaults.get(key);
             } catch (Throwable q) {
                 Constants.LOG.error(q.getMessage());
 
@@ -290,14 +293,17 @@ public class Config {
 
     public float getFloat(String key) {
         try {
-            if (getObject(key) == null) {
+            Object val = getObject(key);
+            if (val == null) {
                 return 1.0f;
+            } else if (val instanceof Float f) {
+                return f;
             }
-            return Float.parseFloat((String) getObject(key));
+            return Float.parseFloat((String) val);
         } catch (Throwable e) {
             Constants.LOG.error(e.getMessage());
             try {
-                return Float.parseFloat((String) defaults.get(key));
+                return (Float) defaults.get(key);
             } catch (Throwable q) {
                 Constants.LOG.error(q.getMessage());
 
@@ -308,31 +314,51 @@ public class Config {
 
     public int getInt(String key) {
         try {
-            if (getObject(key) == null) {
+            Object val = getObject(key);
+            System.out.println("AZ1");
+            if (val == null) {
                 return 1;
+            } else if (val instanceof Integer i) {
+                return i;
             }
-            return Integer.parseInt((String) getObject(key));
+            System.out.println("AZURE2 " + val);
+
+            return Integer.parseInt((String) val);
         } catch (Throwable e) {
+            System.out.println("AZURE3");
+
             Constants.LOG.error(key + "  " + e.getMessage());
             try {
-                return Integer.parseInt((String) defaults.get(key));
+                System.out.println("AZURE4");
+                System.out.println("" + defaults.get(key));
+                System.out.println(Integer.parseInt("" + defaults.get(key)));
+
+                return (Integer) defaults.get(key);
+
             } catch (Throwable q) {
-                Constants.LOG.error(key + " " + q.getMessage());
+                System.out.println("AZURE5");
+
+                Constants.LOG.error("{} {}", key, q.getMessage());
             }
         }
+        System.out.println("AZURE6");
+
         return 1;
     }
 
     public boolean getBool(String key) {
         try {
-            if (getObject(key) == null) {
+            Object val = getObject(key);
+            if (val == null) {
                 return false;
+            } else if (val instanceof Boolean b) {
+                return b;
             }
-            return Boolean.parseBoolean((String) getObject(key));
+            return Boolean.parseBoolean((String) val);
         } catch (Throwable e) {
             Constants.LOG.error(key +  " " + e.getMessage());
             try {
-                return Boolean.parseBoolean((String) defaults.get(key));
+                return (Boolean) defaults.get(key);
             } catch (Throwable q) {
                 Constants.LOG.error(key+ " " +q.getMessage());
             }
@@ -342,10 +368,11 @@ public class Config {
 
     public String getString(String key) {
         try {
-            if (getObject(key) == null) {
+            Object val = getObject(key);
+            if (val == null) {
                 return "";
             }
-            return (String) getObject(key);
+            return (String) val;
         } catch (Throwable e) { // This catch should never be possible!
             Constants.LOG.error(e.getMessage());
             try {
