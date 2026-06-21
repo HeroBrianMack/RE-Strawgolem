@@ -6,16 +6,11 @@ import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
 import org.hero.strawgolem.Constants;
 import org.hero.strawgolem.golem.StrawGolem;
+import org.hero.strawgolem.registry.SoundRegistry;
 
 import java.util.function.Predicate;
 
 public class GolemAvoidEntityGoal<T extends LivingEntity> extends AvoidEntityGoal<T> {
-    double tmp1;
-    double tmp2;
-
-//    public GolemAvoidEntityGoal(PathfinderMob pMob, Class pEntityClassToAvoid, float pMaxDistance, double pWalkSpeedModifier, double pSprintSpeedModifier) {
-//        super(pMob, pEntityClassToAvoid, pMaxDistance, pWalkSpeedModifier, pSprintSpeedModifier);
-//    }
 
     public GolemAvoidEntityGoal(StrawGolem pMob, Class<T> pEntityClassToAvoid, Predicate<Mob> pAvoidPredicate, float pMaxDistance, double pWalkSpeedModifier, double pSprintSpeedModifier, Predicate pPredicateOnAvoidEntity) {
         super(pMob, pEntityClassToAvoid, (living) -> {
@@ -24,17 +19,13 @@ public class GolemAvoidEntityGoal<T extends LivingEntity> extends AvoidEntityGoa
             }
             return false;
         }, pMaxDistance, pWalkSpeedModifier, pSprintSpeedModifier, pPredicateOnAvoidEntity);
-        tmp1 = pSprintSpeedModifier;
-        tmp2 = pWalkSpeedModifier;
     }
-
-//    public GolemAvoidEntityGoal(PathfinderMob pMob, Class pEntityClassToAvoid, float pMaxDistance, double pWalkSpeedModifier, double pSprintSpeedModifier, Predicate pPredicateOnAvoidEntity) {
-//        super(pMob, pEntityClassToAvoid, pMaxDistance, pWalkSpeedModifier, pSprintSpeedModifier, pPredicateOnAvoidEntity);
-//    }
 
     @Override
     public void start() {
         super.start();
+        // Since the golem is afraid, play the scared sound.
+        mob.playSound(SoundRegistry.GOLEM_SCARED.get());
     }
 
     @Override
