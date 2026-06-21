@@ -23,6 +23,11 @@ public class GolemLifespanFeature implements IGolemTickFeature {
      * the Straw Golem's life span will increment by one.
      */
     public void tick() {
+        // This should never happen or be possible.
+        if (golem == null) {
+            Constants.LOG.error("Straw Golem null in: {}!", "Lifespan Feature");
+            return;
+        }
         if (Constants.Golem.lifespan) {
             if (golem.getLifeSpan() >= Constants.Golem.maxLife) {
                 // Kill golem if its lived past its maximum lifespan

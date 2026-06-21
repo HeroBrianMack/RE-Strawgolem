@@ -25,6 +25,11 @@ public class GolemHungerFeature implements IGolemTickFeature {
      * the Straw Golem's hunger will increment by one.
      */
     public void tick() {
+        // This should never happen or be possible.
+        if (golem == null) {
+            Constants.LOG.error("Straw Golem null in: {}!", "Hunger Feature");
+            return;
+        }
         if (Constants.Golem.hunger) {
             if (golem.getHunger() >= Constants.Golem.maxHunger) {
                 updateGolemSpeed();
