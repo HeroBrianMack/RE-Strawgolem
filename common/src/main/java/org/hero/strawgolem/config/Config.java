@@ -136,7 +136,7 @@ public class Config {
         add("Winter Skin", true, "Whether the Straw Golem winter skin will be shown. The skin" +
                 " is still only attainable during the Winter.");
         add("Hemisphere", "North", "For determining season-based timings. Acceptable values are:" +
-                " North, South, None. Note: None will disable seasonal events.");
+                " North, South, None.\n# Note: None will disable seasonal events.");
     }
 
     /**
