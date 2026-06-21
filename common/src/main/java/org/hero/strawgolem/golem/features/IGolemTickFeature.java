@@ -6,4 +6,6 @@ public interface IGolemTickFeature {
     void tick();
 
     void refresh();
+
+    void reset();
 }

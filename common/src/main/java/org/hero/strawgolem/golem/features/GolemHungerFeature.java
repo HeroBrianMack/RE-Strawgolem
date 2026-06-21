@@ -76,8 +76,23 @@ public class GolemHungerFeature implements IGolemTickFeature {
         }
     }
 
+    public void reset() {
+        var attr = golem.getAttribute(Attributes.MOVEMENT_SPEED);
+        if (attr != null) {
+            // Normalizing speedRatio, since I don't want Golems moving triple speed.
+            attr.setBaseValue(Constants.Golem.defaultMovement);
+        } else {
+            // Should never trigger, but best to be safe.
+            Constants.LOG.error("Golem missing Attribute: {}!", "Movement Speed");
+        }
+    }
+
     public void refresh() {
         counter = 0;
-        updateGolemSpeed();
+        if (!Constants.Golem.hunger) {
+            reset();
+        } else {
+            updateGolemSpeed();
+        }
     }
 }

@@ -82,9 +82,22 @@ public class GolemLifespanFeature implements IGolemTickFeature {
             Constants.LOG.error("Golem missing Attribute: {}!", "Max Health");
         }
     }
-
+    public void reset() {
+        var attr = golem.getAttribute(Attributes.MAX_HEALTH);
+        if (attr != null) {
+            // Normalizing healthRatio, since I don't want Golems over-healthed.
+            attr.setBaseValue(Constants.Golem.maxHealth);
+        } else {
+            // Should never trigger, but best to be safe.
+            Constants.LOG.error("Golem missing Attribute: {}!", "Max Health");
+        }
+    }
     public void refresh() {
         counter = 0;
-        updateGolemHealth();
+        if (Constants.Golem.lifespan) {
+            reset();
+        } else {
+            updateGolemHealth();
+        }
     }
 }
