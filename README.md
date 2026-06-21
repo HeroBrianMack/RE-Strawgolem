@@ -1,4 +1,4 @@
-# Straw Golem Rebaled Updated 
+# Straw Golem Rebaled Updated
 This mod adds a helpful and pretty adorable little golem to do some of your farming for you. It can harvest, replant and deliver crops to a nearby storage.
 To download, head on over to either [CurseForge](https://www.curseforge.com/minecraft/mc-mods/straw-golem-rebaled-ported) or [Modrinth](https://modrinth.com/mod/straw-golem-rebaled-updated).
 - It's available for Fabric, Forge, and NeoForge, each at the same stage of development.
@@ -16,8 +16,8 @@ To create a Straw Golem, stand near the crops or farm where you want it to do it
 After you stare into the abyss that is its eyes for long enough, it will stare back and begin to harvest crops!
 
 ## Storage Usage
-Once a Straw Golem harvests a crop, it will seek out somewhere to store the item. Thus, a chest or other storage block should be placed near the crops where the golem does its work, and you should make sure the chest have available space inside to hold the soon-to-be harvested crops. 
-- Your golem is usually clever enough to locate an available storage on its own. 
+Once a Straw Golem harvests a crop, it will seek out somewhere to store the item. Thus, a chest or other storage block should be placed near the crops where the golem does its work, and you should make sure the chest have available space inside to hold the soon-to-be harvested crops.
+- Your golem is usually clever enough to locate an available storage on its own.
 - If you have more than one storage in the vicinity, the golem will choose one on its own.
 - You can designate the storage for a golem to use by shift right clicking on the golem, and then doing the same on a storage.
 - The golem will use it as long as it's within the golem's range. [See Config](https://github.com/HeroBrianMack/RE-Strawgolem/tree/master#Config)
@@ -33,59 +33,60 @@ The mod is made to be fairly configurable, with more configuration options plann
 - You can customize the range that straw golems are willing to search to find crops and chests.
 - You can also whitelist or blacklist crops as well!
 ### Example Config File:
-### [Golem Health]
-#### The max health of a golem.
+#### [Golem Health]
+##### The max health of a golem.
 Max Health=6.0
-#### The max health of a barrel.
+##### The max health of a barrel.e
 Barrel Max Health=100
-#### Whether a golem should have hunger.
+##### Whether a golem should have hunger.
 Hunger=false
-#### The time in seconds it takes for a Straw Golem to become fully hungry.
+##### The time in seconds it takes for a Straw Golem to become fully hungry.
 Hunger Time=60
-#### The item(s) a golem is fed with.
+##### The item(s) a golem is fed with.
 Food Item=minecraft:apple
-#### Whether a golem should have a lifespan.
+##### Whether a golem should have a lifespan.
 Lifespan=false
-#### The time in seconds that a Straw Golem will have as a natural lifespan in a default environment.
+##### The time in seconds that a Straw Golem will have as a natural lifespan in a default environment.
 Lifespan Time=4800
-#### Whether golems should have variation in their lifespans.
+##### Whether golems should have variation in their lifespans.
 Lifespan Variation=true
-#### Whether a golem should age faster or slower in response to environmental factors, examples being:
-#### A golem in rain or water will age faster, whereas a golem in cold biomes will age slower.
+##### Whether a golem should age faster or slower in response to environmental factors, examples being:<br>A golem in rain or water will age faster, whereas a golem in cold biomes will age slower.
 Environmental Decay=false
-#### The item(s) a golem is repaired with.
+##### The item(s) a golem is repaired with.
 Repair Item=minecraft:wheat
-#### Whether a golem should shiver in response to environmental factors such as rain and cold biomes.
+##### Whether a golem should shiver in response to environmental factors such as rain and cold biomes.
 Shiver=true
-### [Golem Movement]
-#### The walk speed of a golem.
+#### [Golem Movement]
+##### The walk speed of a golem.
 Walk Speed=0.5
-#### The run speed of a golem.
+##### The run speed of a golem.
 Run Speed=0.8
-#### How far a golem can wander
+##### How far a golem can wander
 Wander Range=24
-#### Whether a golem should panic when threatened.
+##### Whether a golem should panic when threatened.
 Panic=true
-#### How far a golem can flee
+##### How far a golem can flee
 Flee Range=15.0
-### [Golem Harvesting]
-#### Range for a golem to detect crops and chests.
+#### [Golem Harvesting]
+##### Range for a golem to detect crops and chests.
 Harvest Range=24
-#### Whether a golem should harvest crop blocks like pumpkins and melons.
+##### Whether a golem should harvest crop blocks like pumpkins and melons.
 Block Harvesting=true
-#### Whether a golem should only harvest crops in the whitelist.
+##### Whether a golem should only harvest crops in the whitelist.
 Use Whitelist=true
-#### What crops should be harvested, please use valid resource locations.
+##### What crops should be harvested, please use valid resource locations.
 Crop Whitelist=minecraft:wheat minecraft:potato
-### [Miscellaneous]
-#### Whether animals should try to attack Straw Golems
+#### [Miscellaneous]
+##### Whether animals should try to attack Straw Golems
 Hungry Animals=true
-#### Whether pillagers should try to attack Straw Golems
+##### Whether pillagers should try to attack Straw Golems
 Angry Pillagers=true
-#### For determining season-based timings. Acceptable values are: North, South, None. Note: None will disable seasonal events.
+##### Whether the Straw Golem winter skin will be shown. <br> Note: The skin is still only attainable during the Winter.
+Winter Skin=false
+##### For determining season-based timings. Acceptable values are: North, South, None. <br>Note: None will disable seasonal events.
 Hemisphere=South
-### [Metadata]
-#### Please do not modify this value casually, or risk config values being overwritten or made invalid!
+#### [Metadata]
+##### Please do not modify this value casually, or risk config values being overwritten or made invalid!
 Config Version Number=1
 
 ## Compatibility
