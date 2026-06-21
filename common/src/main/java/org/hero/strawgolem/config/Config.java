@@ -133,8 +133,8 @@ public class Config {
         section("Miscellaneous");
         add("Hungry Animals", true, "Whether animals should try to attack Straw Golems");
         add("Angry Pillagers", true, "Whether pillagers should try to attack Straw Golems");
-        add("Winter Skin", true, "Whether the Straw Golem winter skin will be shown. The skin" +
-                " is still only attainable during the Winter.");
+        add("Winter Skin", true, "Whether the Straw Golem winter skin will be shown." +
+                "\n# Note: The skin is still only attainable during the Winter.");
         add("Hemisphere", "North", "For determining season-based timings. Acceptable values are:" +
                 " North, South, None.\n# Note: None will disable seasonal events.");
     }
