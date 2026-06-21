@@ -388,7 +388,7 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
      * @return Whether the Straw Golem is festive.
      */
     public boolean isFestive() {
-        return entityData.get(FESTIVE);
+        return Golem.winterSkin && entityData.get(FESTIVE);
     }
 
     /**

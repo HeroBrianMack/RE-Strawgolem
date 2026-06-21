@@ -52,6 +52,7 @@ public class Constants {
         // Misc
         public static boolean animalAggro = CONFIG.getBool("Hungry Animals");
         public static final boolean raiderAggro = CONFIG.getBool("Angry Pillagers");
+        public static final boolean winterSkin = CONFIG.getBool("Winter Skin");
         public static final String hemisphere = CONFIG.getString("Hemisphere");
 
         private static Set<Block> constructBlockList(String list) {
