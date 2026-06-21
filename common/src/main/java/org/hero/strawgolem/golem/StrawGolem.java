@@ -53,17 +53,26 @@ import java.util.List;
 import static org.hero.strawgolem.Constants.*;
 
 public class StrawGolem extends AbstractGolem implements GeoAnimatable {
+    // Constructor for Straw Golem just uses the super class (needs to be examined for changes in future versions).
     public StrawGolem(EntityType<? extends StrawGolem> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
     }
+
+    // GeckoLib variable, unnoteworthy.
     private final AnimatableInstanceCache instanceCache = GeckoLibUtil.createInstanceCache(this);
+
+    // The deliverer for the Straw Golem.
     public final Deliverer deliverer = new Deliverer();
+    // The features of the Straw Golem.
     private final GolemHungerFeature hunger = new GolemHungerFeature(this);
     private final GolemLifespanFeature lifeSpan = new GolemLifespanFeature(this);
     private final List<IGolemTickFeature> features = List.of(hunger, lifeSpan);
+
+    // The constants of the Straw Golem.
     public static final double defaultMovement = Golem.defaultMovement;
     public static final double defaultWalkSpeed = Golem.defaultWalkSpeed;
     public static final float baseHealth = Golem.maxHealth;
+    // Synched data accessors for the Straw Golem.
     private static final EntityDataAccessor<Boolean> HAT = SynchedEntityData.defineId(StrawGolem.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> FESTIVE = SynchedEntityData.defineId(StrawGolem.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> PANIC = SynchedEntityData.defineId(StrawGolem.class, EntityDataSerializers.BOOLEAN);
@@ -72,15 +81,20 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
     private static final EntityDataAccessor<Integer> BARREL = SynchedEntityData.defineId(StrawGolem.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> HUNGER = SynchedEntityData.defineId(StrawGolem.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> LIFE_SPAN = SynchedEntityData.defineId(StrawGolem.class, EntityDataSerializers.INT);
-
     private static final EntityDataAccessor<BlockPos> PRIORITY_POS = SynchedEntityData.defineId(StrawGolem.class, EntityDataSerializers.BLOCK_POS);
 
+    // Variable for forcing Straw Golem animation resets.
     private boolean forceAnimationReset = false;
+    // Variable for determining whether Straw Golem is creating snow particles.
     public boolean createSnow = false;
+
     @Override
     protected void registerGoals() {
+        // Adds goals for the Straw Golem.
         goalSelector.addGoal(0, new FloatGoal(this));
+        // Multiplying by 1.2 as a sort of "adrenaline" factor.
         goalSelector.addGoal(0, new PanicGoal(this, Golem.defaultRunSpeed * 1.2));
+        // Adds the Avoidance goals.
         generateAvoids();
         goalSelector.addGoal(2, new GolemWanderGoal(this));
         goalSelector.addGoal(1, new GolemDepositGoal(this));
@@ -88,25 +102,30 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
         goalSelector.addGoal(1, new GolemGrabGoal(this));
     }
 
+    /**
+     * Generates and adds to the goalSelector the Avoidance goals
+     * of the entities that the Straw Golem wants to avoid.
+     */
     protected void generateAvoids() {
-        double walk = defaultWalkSpeed;
-//        walk = defaultWalkSpeed;
-        double run = Golem.defaultRunSpeed;
-//        run = Golem.defaultRunSpeed;
-        int prio = 1;
-        goalSelector.addGoal(prio, new GolemAvoidEntityGoal<>(this, Pillager.class,
-                (e) -> e.getTarget() instanceof StrawGolem, Golem.fleeRange, walk, run, EntitySelector.NO_CREATIVE_OR_SPECTATOR));
-        goalSelector.addGoal(prio, new GolemAvoidEntityGoal<>(this, Sheep.class,
-                (e) -> e.getTarget() instanceof StrawGolem, Golem.fleeRange, walk, run, EntitySelector.NO_CREATIVE_OR_SPECTATOR));
-        goalSelector.addGoal(prio, new GolemAvoidEntityGoal<>(this, Cow.class,
-                (e) -> e.getTarget() instanceof StrawGolem, Golem.fleeRange, walk, run, EntitySelector.NO_CREATIVE_OR_SPECTATOR));
-        goalSelector.addGoal(prio, new GolemAvoidEntityGoal<>(this, Pig.class,
-                (e) -> e.getTarget() instanceof StrawGolem, Golem.fleeRange, walk, run, EntitySelector.NO_CREATIVE_OR_SPECTATOR));
+        final double WALK = defaultWalkSpeed;
+        final double RUN = Golem.defaultRunSpeed;
+        // Just a variable to store priority conveniently.
+        final int PRIORITY = 1;
+        // Adding the avoid entity goals, could make this a for-each loop, but it seems unneeded.
+        goalSelector.addGoal(PRIORITY, new GolemAvoidEntityGoal<>(this, Pillager.class,
+                (e) -> e.getTarget() instanceof StrawGolem, Golem.fleeRange, WALK, RUN, EntitySelector.NO_CREATIVE_OR_SPECTATOR));
+        goalSelector.addGoal(PRIORITY, new GolemAvoidEntityGoal<>(this, Sheep.class,
+                (e) -> e.getTarget() instanceof StrawGolem, Golem.fleeRange, WALK, RUN, EntitySelector.NO_CREATIVE_OR_SPECTATOR));
+        goalSelector.addGoal(PRIORITY, new GolemAvoidEntityGoal<>(this, Cow.class,
+                (e) -> e.getTarget() instanceof StrawGolem, Golem.fleeRange, WALK, RUN, EntitySelector.NO_CREATIVE_OR_SPECTATOR));
+        goalSelector.addGoal(PRIORITY, new GolemAvoidEntityGoal<>(this, Pig.class,
+                (e) -> e.getTarget() instanceof StrawGolem, Golem.fleeRange, WALK, RUN, EntitySelector.NO_CREATIVE_OR_SPECTATOR));
     }
 
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder pBuilder) {
         super.defineSynchedData(pBuilder);
+        // Defines any required persistent and synched data.
         pBuilder.define(CARRY_STATUS, 0);
         pBuilder.define(PICKUP_STATUS, 0);
         pBuilder.define(HAT, false);
@@ -134,6 +153,10 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
         return RenderUtil.getCurrentTick();
     }
 
+    /**
+     * Creates the Straw Golem's Attributes.
+     * @return The Straw Golem's Attributes.
+     */
     public static AttributeSupplier.Builder createAttributes() {
         return Mob.createMobAttributes()
                 .add(Attributes.MOVEMENT_SPEED, defaultMovement)
@@ -145,61 +168,104 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
         // Tick each feature
         // May need to push all of these onto serverSide
         if (!level().isClientSide && isAlive())  {
+            if (random.nextFloat() < 0.02f) {
+                playSound(SoundRegistry.GOLEM_AMBIENT.get());
+            }
             features.forEach(IGolemTickFeature::tick);
             setPanic(isRunningScaredGoal());
         }
+        // Get the Straw Golem's held item.
         Item item = getMainHandItem().getItem();
+
+        // Refresh the Straw Golem's carry status based on held item.
+
+        // If the Straw Golem is holding a Block.
         if (item instanceof BlockItem && !(item instanceof ItemNameBlockItem)) setCarryStatus(2);
+        // If the Straw Golem is holding a regular item.
         else if (!getMainHandItem().isEmpty()) setCarryStatus(1);
+        // If the Straw Golem is holding nothing.
         else setCarryStatus(0);
         super.tick();
     }
 
     @Override
     protected InteractionResult mobInteract(Player pPlayer, InteractionHand pHand) {
+        // If the interaction is on the client side, don't bother (note: the super call is equivalent).
         if (level().isClientSide) return InteractionResult.PASS;
+        // Straw Golem's enjoy interaction by a player regardless of the item.
         this.playSound(SoundRegistry.GOLEM_HAPPY.get());
+        // Get the item the player is holding.
         ItemStack item = pPlayer.getMainHandItem();
+        // Currently only doing main hand processing for reduction of bugs/unintended interactions.
         if (pHand == InteractionHand.MAIN_HAND && item != ItemStack.EMPTY) {
+            // If the item is a barrel and the Straw Golem is not wearing a fresh barrel.
             if (item.is(Items.BARREL) && barrelHP() != Golem.barrelHealth) {
+                // Replace the barrel with the player's held one.
                 entityData.set(BARREL, Golem.barrelHealth);
+                // Remove a barrel from the player's hand.
                 item.shrink(1);
             } else if (Golem.repairItem.contains(item.getItem()) && healthStatus() != 0) {
+                // If the player is holding a Straw Golem Repair Item, and the Straw Golem is damaged.
+
                 // Decreasing life span by life a third of max life span to a minimum of 0.
                 setLifeSpan(Math.max(0, getLifeSpan() - Golem.maxLife / 3));
-                // Updating the golem's max health
+                // Updating the Straw Golem's max health
                 lifeSpan.refresh();
+                // If max health is less than the increase in health, set Straw Golem to max health.
                 if (getMaxHealth() - getHealth() < 3.0f) {
                     setHealth(getMaxHealth());
                 } else {
+                    // Else increase the Straw Golem's health by 3.
                     setHealth(getHealth() + 3.0f);
                 }
+                // Straw Golems are interested in repairs so play the sound.
                 this.playSound(SoundRegistry.GOLEM_INTERESTED.get());
+                // Decrement the repair item in the player's hand.
                 item.shrink(1);
             } else if (Golem.foodItem.contains(item.getItem()) && getHunger() > Golem.maxHunger / 5) {
-                // Decreasing life span by life a third of max life span to a minimum of 0.
+                // If the player is holding a Straw Golem Food Item, and the Straw Golem is hungry.
+
+                // Decreasing hunger by a third of max hunger to a minimum of 0.
                 setHunger(Math.max(0, getHunger() - Golem.maxHunger / 3));
-                // Updating the golem's max health
+                // Updating the Straw Golem's hunger.
                 hunger.refresh();
+                // Straw Golems are interested in food so play the sound.
                 this.playSound(SoundRegistry.GOLEM_INTERESTED.get());
+                // Decrement the food item in the player's hand.
                 item.shrink(1);
-            }
-            else if (item.is(ItemRegistry.STRAW_HAT.get()) && !hasHat()) {
+            } else if (item.is(ItemRegistry.STRAW_HAT.get()) && !hasHat()) {
+                // If the item is a straw hat and the Straw Golem is hatless.
+
+                // Equip the hat.
                 entityData.set(HAT, true);
+                // Straw Golems are interested in straw hats, so play the sound.
                 this.playSound(SoundRegistry.GOLEM_INTERESTED.get());
+                // Decrement the hat in the player's hand.
+                item.shrink(1);
             } else if (item.is(Items.BRUSH)) {
+                // Straw Golems simply enjoy being brushed
                 this.playSound(SoundRegistry.GOLEM_HAPPY.get());
+                // Clears the winter model.
                 entityData.set(FESTIVE, false);
+                // Could drain durability here, but doesn't seem notable enough to do so.
             }
+            // Mark the result as consumption.
             return InteractionResult.CONSUME;
         } else if (pHand == InteractionHand.MAIN_HAND
                     && pPlayer.getMainHandItem().isEmpty() && pPlayer.isCrouching()
                     && pPlayer instanceof GolemOrderer orderer) {
+            // If player has nothing in mainhand and is crouching.
+
+            // If a player has no assigned Straw Golem or the assigned is another Straw Golem, select this one.
             if (orderer.strawgolemRewrite$getGolem() == null || !orderer.strawgolemRewrite$getGolem().equals(this)) {
+                // Assign the Straw Golem to the player.
                 orderer.strawgolemRewrite$setGolem(this);
+                // Display an assignment message.
                 pPlayer.displayClientMessage(Component.translatable("strawgolem.ordering.start"), true);
             } else {
+                // Else unassign the Straw Golem from the player.
                 orderer.strawgolemRewrite$setGolem(null);
+                // Display an unassignment message.
                 pPlayer.displayClientMessage(Component.translatable("strawgolem.ordering.stop"), true);
             }
         }
@@ -210,7 +276,8 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
     @Override
     protected void actuallyHurt(DamageSource pDamageSource, float pDamageAmount) {
         try {
-            if (pDamageSource.getDirectEntity() instanceof Snowball && isHoliday() && !this.level().isClientSide) {
+            // If a snowball and the season is Winter.
+            if (pDamageSource.getDirectEntity() instanceof Snowball && isWinter() && !this.level().isClientSide) {
                 this.playSound(SoundRegistry.GOLEM_STRAINED.get());
                 entityData.set(FESTIVE, true);
                 return;
@@ -218,19 +285,26 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
         } catch(Throwable e) {
             LOG.error(e.getMessage());
         }
-        if (barrelHP() - pDamageAmount >= 0) { // barrel blocks
+        if (barrelHP() - pDamageAmount >= 0) { // barrel blocks the damage.
             entityData.set(BARREL, (int) (barrelHP() - pDamageAmount));
             playSound(SoundEvents.SHIELD_BLOCK);
             return;
-        } else if (hasBarrel()) { // barrel breaks
+        } else if (hasBarrel()) { // barrel breaks from the damage.
             // Reduce the damage by the remaining barrel health
             pDamageAmount -= barrelHP();
             entityData.set(BARREL, 0);
             playSound(SoundEvents.SHIELD_BREAK);
         }
-        // TODO: Add Panic
         this.playSound(SoundRegistry.GOLEM_HURT.get());
         super.actuallyHurt(pDamageSource, pDamageAmount);
+    }
+
+
+    @Override
+    public void die(DamageSource pDamageSource) {
+        super.die(pDamageSource);
+        // Play Straw Golem death sound upon its death.
+        playSound(SoundRegistry.GOLEM_DEATH.get());
     }
 
     @Override
@@ -252,37 +326,35 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
 
     @Override
     public void addAdditionalSaveData(CompoundTag tag) {
+        // Loading persistent golem data.
         tag.putBoolean("hat", this.hasHat());
         tag.putBoolean("festive", this.entityData.get(FESTIVE));
         tag.putInt("carry", carryStatus());
         tag.putInt("barrelHP", barrelHP());
         tag.putInt("hunger", getHunger());
         tag.putLong("priorityPos", this.entityData.get(PRIORITY_POS).asLong());
-//        tag.putInt("barrelHealth", this.entityData.get(BARREL_HEALTH));
-//        tag.putBoolean("fixSpeed", fixSpeed);
         super.addAdditionalSaveData(tag);
     }
-    // May adjust this, kind of a clunky description
-    /*
-     * 0 : The golem is at full or above full health.
-     * 1 : The golem is below full health, but has more than a third of health left.
-     * 2 : The golem has a third or less of its health left.
-    */
+
     /**
      * This method returns an integer depending on the golem's health.
-     * @return A status code based on golem health, 0 means full health, 1 means injured, 2 means severely injured.
+     * @return A status code based on golem health,
+     * 0 means essentially full health,
+     * 1 means injured,
+     * 2 means severely injured.
      */
     public int healthStatus() {
-        // basic code to check how dead a golem is
-//        return getMaxHealth() - 0.0001f <= getHealth() ? 0 : getMaxHealth() * 0.333333 < getHealth() ? 1 : 2;
-        // Switching to use baseHealth now that life span is being implemented
-//        Constants.LOG.error("{} {}", getHealth(), baseHealth);
+        // basic code to check how dead a golem is.
+        // Will return 0 even with minor damage to address lifespan changing health.
         return getHealth() / baseHealth > 0.8 ? 0 : baseHealth * 0.333333 < getHealth() ? 1 : 2;
     }
 
     /**
-     * This method returns an integer depending on the golem's movement status.
-     * @return A status code based on golem movement, 0 means zero movement, 1 means walking, 2 means running.
+     * This method returns an integer depending on the Straw Golem's movement status.
+     * @return A status code based on golem movement,
+     * 0 means zero movement,
+     * 1 means walking,
+     * 2 means running.
      */
     public int movementStatus() {
         double movement = getDeltaMovement().horizontalDistance() * level().tickRateManager().tickrate();
@@ -290,23 +362,40 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
     }
 
     /**
-     * This method returns an integer depending on the golem's carrying status.
-     * @return A status code based on item carrying, 0 means no item, 1 means a regular item, 2 means a block.
+     * This method returns an integer depending on the Straw Golem's carrying status.
+     * @return A status code based on item carrying,
+     * 0 means no item,
+     * 1 means a regular item,
+     * 2 means a block.
      */
     public int carryStatus() {
         return entityData.get(CARRY_STATUS);
     }
 
+    /**
+     * Sets the Straw Golem's carry status.
+     * @param status The new Straw Golem carry status,
+     * 0 means no item,
+     * 1 means regular item,
+     * 2 means a block.
+     */
     public void setCarryStatus(int status) {
         entityData.set(CARRY_STATUS, status);
     }
 
+    /**
+     * Determines if the Straw Golem is festive (winter-form).
+     * @return Whether the Straw Golem is festive.
+     */
     public boolean isFestive() {
         return entityData.get(FESTIVE);
     }
 
-    // ToDo: Handle hemisphere, likely config based
-    private boolean isHoliday() {
+    /**
+     * Determines based on hemisphere if the current season is Winter.
+     * @return Whether the current season is Winter.
+     */
+    private boolean isWinter() {
         Month month = LocalDate.now().getMonth();
         return (Golem.hemisphere.equals("North") && (month == Month.DECEMBER || month == Month.JANUARY))
         || (Golem.hemisphere.equals("South") && (month == Month.JULY || month == Month.AUGUST));
@@ -314,7 +403,10 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
 
     /**
      * This method returns an integer depending on the golem's pick up status.
-     * @return A status code based on if and what the golem is picking up, 0 means not picking up, 1 means picking up an item, 2 means picking up a block.
+     * @return A status code based on if and what the golem is picking up,
+     * 0 means not picking up,
+     * 1 means picking up an item,
+     * 2 means picking up a block.
      */
     public int pickupStatus() {
         return entityData.get(PICKUP_STATUS);
@@ -323,74 +415,135 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
     /**
      * 0 means not picking up, 1 means picking up an item, 2 means picking up a block.
      */
+    /**
+     * Sets the Straw Golem's pickup status.
+     * @param status The new pickup status,
+     * 0 means not picking up,
+     * 1 means picking up an item,
+     * 2 means picking up a block.
+     */
     public void setPickupStatus(int status) {
         entityData.set(PICKUP_STATUS, status);
     }
-// rewrote this part, no stupid things included
-    public void setPickupStatus(ItemStack item) {
-//        itemToPickUp = item;
-//        if (immediate) pickup();
-//        setItemSlot(EquipmentSlot.MAINHAND, item);
 
+    /**
+     * Sets the Straw Golem's pickup status based on the item it is picking up.
+     * @param item The item the Straw Golem is picking up.
+     */
+    public void setPickupStatus(ItemStack item) {
+        // If the item is not nothing, continue setting pickup status.
         if (!item.isEmpty()) {
+            // If the item is a type of block, set pickup status to 2.
             if (item.getItem() instanceof BlockItem && !(item.getItem() instanceof ItemNameBlockItem)) {
                 setPickupStatus(2);
             }
-            else {
+            else {  // Else set pickup status to 1 to indicate a regular item.
                 setPickupStatus(1);
             }
         } else {
+            // If item is nothing, clear pickup status by setting it to 0.
             setPickupStatus(0);
         }
     }
 
+    /**
+     * Checks if the Straw Golem should hold an item above its head.
+     * @return Whether the Straw Golem should hold an item above its head.
+     */
     public boolean holdItemAbove() {
-        return carryStatus() == 2 || hasBarrel();
+        // Either the Straw Golem is holding a block,
+        // or it is holding an item while wearing a barrel.
+        return carryStatus() == 2 || (carryStatus() == 1 && hasBarrel());
     }
 
+    /**
+     * Checks if the Straw Golem has a hat.
+     * @return Whether the Straw Golem has a hat.
+     */
     public boolean hasHat() {
         return entityData.get(HAT);
     }
 
+    /**
+     * Gets the health of the Straw Golem's barrel.
+     * @return The health of the Straw Golem's barrel.
+     */
     public int barrelHP() {
         return entityData.get(BARREL);
     }
 
+    /**
+     * Checks if the Straw Golem has a barrel.
+     * @return Whether the Straw Golem has a barrel.
+     */
     public boolean hasBarrel() {
+        // If Barrel Health is not 0, it must have a barrel.
         return barrelHP() != 0;
     }
 
+    /**
+     * Sets the Block Position favored by the Straw Golem for delivering items.
+     * @param pos The Block Position favored by the Straw Golem for delivering items.
+     */
     public void setPriorityPos(BlockPos pos) {
         entityData.set(PRIORITY_POS, pos);
     }
 
+    /**
+     * Gets the Block Position favored by the Straw Golem for delivering items.
+     * @return The Block Position favored by the Straw Golem for delivering items.
+     */
     public BlockPos getPriorityPos() {
         return entityData.get(PRIORITY_POS);
     }
 
+    /**
+     * This determines if the Straw Golem is in rain.
+     * @return Whether the Straw Golem is in rain.
+     */
     private boolean isInRain() {
         BlockPos blockpos = this.blockPosition();
         return this.level().isRainingAt(blockpos) || this.level().isRainingAt(BlockPos.containing(blockpos.getX(), this.getBoundingBox().maxY, blockpos.getZ()));
     }
 
+    /**
+     * This determines if the Straw Golem should be considered cold.
+     * @return Whether the Straw Golem is cold.
+     */
     private boolean isCold() {
         return !this.level().getBiome(this.blockPosition()).value().warmEnoughToRain(this.blockPosition());
     }
 
     // May make barrel ignore cold shivering?
+    /**
+     * This determines if the Straw Golem should shiver.
+     * Current determinators: Water/Bubble, Powder Snow, Rain without hat, and Cold Biome.
+     * @return Whether the Straw Golem should shiver.
+     */
     public boolean shouldShiver() {
         return isInWaterOrBubble() || isInPowderSnow || (!hasHat() && isInRain()) || isCold();
     }
 
+    /**
+     * This determines if a Straw Golem needs its animation force reset.
+     * @return Whether the Straw Golem needs its animation to be force reset.
+     */
     public boolean shouldForceAnimationReset() {
+        // Check if the Golem needs its animation to be force reset.
         if (forceAnimationReset) {
+            // Now that we know it needs it to be force reset, set it back to false.
             forceAnimationReset = false;
+            // Return true to indicate the required animation force reset.
             return true;
         } else {
+            // If no force reset needed, return false,
             return false;
         }
     }
 
+    /**
+     * This method Straw Golem to need to have its animation force reset.
+     */
     public void forceAnimationReset() {
         this.forceAnimationReset = true;
     }
@@ -402,6 +555,7 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
     public void setHunger(int hunger) {
         entityData.set(HUNGER, hunger);
     }
+
     /**
      * Gets the golem's hunger level.
      */
@@ -431,12 +585,15 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
      */
     public float getEnvironmentHarshness() {
         float harsh = 1.0f;
+        // If in the water, decay should become more rapid.
         if (isInWaterOrBubble()) {
             harsh++;
         }
+        // If in the cold, decay should slow.
         if (isInPowderSnow || isCold()) {
             harsh -= 0.5f;
         }
+        // If in the rain without a hat, decay should become more rapid.
         if (isInRain() && !hasHat()) {
             harsh++;
         }
@@ -459,10 +616,18 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
         return false;
     }
 
+    /**
+     * Gets the Straw Golem's panic status.
+     * @return The Straw Golem's panic status.
+     */
     public boolean getPanic() {
         return Golem.panic && entityData.get(PANIC);
     }
 
+    /**
+     * Sets the Straw Golem's panic status
+     * @param panic The new panic status.
+     */
     public void setPanic(boolean panic) {
         entityData.set(PANIC, panic);
     }
