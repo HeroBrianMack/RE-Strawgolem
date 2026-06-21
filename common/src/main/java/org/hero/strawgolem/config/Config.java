@@ -42,7 +42,7 @@ public class Config {
         // Note that this map is Immutable, so do not try to modify the map!
         // Version 1 Overrides:
         versionOverrides.put(1,
-                Map.of("Config Version Number", "1"));
+                Map.of("Config Version Number", "1", "Barrel Max Health", "100"));
         // Version X Overrides:
 //        versionOverrides.put(X,
 //                Map.of("Config Version Number", "X"));
