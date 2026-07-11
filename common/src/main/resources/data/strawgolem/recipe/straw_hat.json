@@ -5,9 +5,7 @@
     "###"
   ],
   "key": {
-    "#": {
-      "item": "minecraft:wheat"
-    }
+    "#": "minecraft:wheat"
   },
   "result": {
     "id": "strawgolem:straw_hat",
