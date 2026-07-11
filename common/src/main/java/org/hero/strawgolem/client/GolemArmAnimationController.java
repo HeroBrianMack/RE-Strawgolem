@@ -3,7 +3,7 @@ package org.hero.strawgolem.client;
 import net.minecraft.client.Minecraft;
 import org.hero.strawgolem.Constants;
 import org.hero.strawgolem.golem.StrawGolem;
-import software.bernie.geckolib.animation.AnimationController;
+import software.bernie.geckolib.animatable.processing.AnimationController;
 import software.bernie.geckolib.animation.PlayState;
 import software.bernie.geckolib.animation.RawAnimation;
 
@@ -19,10 +19,10 @@ public class GolemArmAnimationController extends AnimationController<StrawGolem>
     };
 
     private static final AnimationStateHandler<StrawGolem> PREDICATE = event -> {
-        StrawGolem golem = event.getAnimatable();
+        StrawGolem golem = event.animatable();
         // if the golem is picking a block up
         if (golem.pickupStatus() != 0 || golem.shouldForceAnimationReset()) return PlayState.STOP;
-        AnimationController<StrawGolem> controller = event.getController();
+        AnimationController<StrawGolem> controller = event.controller();
         if (controller.getAnimationState().equals(State.STOPPED)) {
             controller.forceAnimationReset();
         }
@@ -38,7 +38,7 @@ public class GolemArmAnimationController extends AnimationController<StrawGolem>
         return PlayState.CONTINUE;
     };
 
-    public GolemArmAnimationController(StrawGolem animatable) {
-        super(animatable, "arms_handler", Constants.Animation.TRANSITION_TIME, PREDICATE);
+    public GolemArmAnimationController() {
+        super("arms_handler", Constants.Animation.TRANSITION_TIME, PREDICATE);
     }
 }

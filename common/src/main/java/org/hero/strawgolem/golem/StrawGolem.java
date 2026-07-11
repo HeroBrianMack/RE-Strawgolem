@@ -20,7 +20,7 @@ import net.minecraft.world.entity.ai.goal.PanicGoal;
 import net.minecraft.world.entity.animal.AbstractGolem;
 import net.minecraft.world.entity.animal.Cow;
 import net.minecraft.world.entity.animal.Pig;
-import net.minecraft.world.entity.animal.Sheep;
+import net.minecraft.world.entity.animal.sheep.Sheep;
 import net.minecraft.world.entity.monster.Pillager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Snowball;
@@ -46,7 +46,7 @@ import org.hero.strawgolem.registry.SoundRegistry;
 import org.jetbrains.annotations.NotNull;
 import software.bernie.geckolib.animatable.GeoAnimatable;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.animation.AnimatableManager;
+import software.bernie.geckolib.animatable.manager.AnimatableManager;
 import software.bernie.geckolib.util.GeckoLibUtil;
 import software.bernie.geckolib.util.RenderUtil;
 
@@ -143,9 +143,9 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
     }
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar registrar) {
-        registrar.add(new GolemArmAnimationController(this));
-        registrar.add(new GolemLegAnimationController(this));
-        registrar.add(new GolemHarvestAnimationController(this));
+        registrar.add(new GolemArmAnimationController());
+        registrar.add(new GolemLegAnimationController());
+        registrar.add(new GolemHarvestAnimationController());
     }
 
     @Override
@@ -317,13 +317,13 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
         }
         if (barrelHP() - pDamageAmount > 0) { // barrel blocks the damage.
             entityData.set(BARREL, (int) (barrelHP() - pDamageAmount));
-            playSound(SoundEvents.SHIELD_BLOCK);
+            playSound(SoundEvents.SHIELD_BLOCK.value());
             return;
         } else if (hasBarrel()) { // barrel breaks from the damage.
             // Reduce the damage by the remaining barrel health
             pDamageAmount -= barrelHP();
             entityData.set(BARREL, 0);
-            playSound(SoundEvents.SHIELD_BREAK);
+            playSound(SoundEvents.SHIELD_BREAK.value());
         }
         this.playSound(SoundRegistry.GOLEM_HURT.get());
         super.actuallyHurt(level, pDamageSource, pDamageAmount);
@@ -342,16 +342,17 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
         super.readAdditionalSaveData(tag);
         // Checking if golem speed needs fixed
         // Hat!
-        this.entityData.set(HAT, tag.getBoolean("hat"));
-        this.entityData.set(FESTIVE, tag.getBoolean("festive"));
+        this.entityData.set(HAT, tag.getBoolean("hat").orElse(hasHat()));
+        this.entityData.set(FESTIVE, tag.getBoolean("festive").orElse(isFestive()));
         // I don't think it's necessary to keep golem panicking?
 //        this.entityData.set(PANIC, tag.getBoolean("panic"));
-        this.entityData.set(CARRY_STATUS, tag.getInt("carry"));
+        this.entityData.set(CARRY_STATUS, tag.getInt("carry").orElse(carryStatus()));
         // Barrel!
-        this.entityData.set(BARREL, tag.getInt("barrelHP"));
-        this.entityData.set(HUNGER, tag.getInt("hunger"));
-        this.entityData.set(LIFE_SPAN, tag.getInt("hunger"));
-        this.entityData.set(PRIORITY_POS, BlockPos.of(tag.getLong("priorityPos")));
+        this.entityData.set(BARREL, tag.getInt("barrelHP").orElse(barrelHP()));
+        this.entityData.set(HUNGER, tag.getInt("hunger").orElse(getHunger()));
+        this.entityData.set(LIFE_SPAN, tag.getInt("lifespan").orElse(getLifeSpan()));
+        this.entityData.set(PRIORITY_POS, BlockPos.of(tag.getLong("priorityPos")
+                .orElse(getPriorityPos().asLong())));
     }
 
     @Override
@@ -362,6 +363,7 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
         tag.putInt("carry", carryStatus());
         tag.putInt("barrelHP", barrelHP());
         tag.putInt("hunger", getHunger());
+        tag.putInt("lifespan", getLifeSpan());
         tag.putLong("priorityPos", this.entityData.get(PRIORITY_POS).asLong());
         super.addAdditionalSaveData(tag);
     }
@@ -549,11 +551,11 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
     // May make barrel ignore cold shivering?
     /**
      * This determines if the Straw Golem should shiver.
-     * Current determinators: Water/Bubble, Powder Snow, Rain without hat, and Cold Biome.
+     * Current determinators: Water, Powder Snow, Rain without hat, and Cold Biome.
      * @return Whether the Straw Golem should shiver.
      */
     public boolean shouldShiver() {
-        return isInWaterOrBubble() || isInPowderSnow || (!hasHat() && isInRain()) || isCold();
+        return isInWater() || isInPowderSnow || (!hasHat() && isInRain()) || isCold();
     }
 
     /**
@@ -618,7 +620,7 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
     public float getEnvironmentHarshness() {
         float harsh = 1.0f;
         // If in the water, decay should become more rapid.
-        if (isInWaterOrBubble()) {
+        if (isInWater()) {
             harsh++;
         }
         // If in the cold, decay should slow.

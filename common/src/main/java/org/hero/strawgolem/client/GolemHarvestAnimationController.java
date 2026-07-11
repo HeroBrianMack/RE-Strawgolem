@@ -2,7 +2,7 @@ package org.hero.strawgolem.client;
 
 import org.hero.strawgolem.Constants;
 import org.hero.strawgolem.golem.StrawGolem;
-import software.bernie.geckolib.animation.AnimationController;
+import software.bernie.geckolib.animatable.processing.AnimationController;
 import software.bernie.geckolib.animation.PlayState;
 import software.bernie.geckolib.animation.RawAnimation;
 
@@ -15,8 +15,8 @@ public class GolemHarvestAnimationController extends AnimationController<StrawGo
     };
 
     private static final AnimationStateHandler<StrawGolem> PREDICATE = event -> {
-        StrawGolem golem = event.getAnimatable();
-        AnimationController<StrawGolem> controller = event.getController();
+        StrawGolem golem = event.animatable();
+        AnimationController<StrawGolem> controller = event.controller();
         // if the golem is picking a block up
         int status = golem.pickupStatus();
         if (status != 0) {
@@ -32,19 +32,21 @@ public class GolemHarvestAnimationController extends AnimationController<StrawGo
             return event.setAndContinue(harvest[status]);
 
         }
-        event.getController().forceAnimationReset();
+        event.controller().forceAnimationReset();
         return PlayState.STOP;
     };
 
-    public GolemHarvestAnimationController(StrawGolem animatable) {
-        super(animatable, "harvest_handler", Constants.Animation.TRANSITION_TIME, PREDICATE);
+    public GolemHarvestAnimationController() {
+        super("harvest_handler", Constants.Animation.TRANSITION_TIME, PREDICATE);
         // This will likely need changed, but for now it's fine...
         setCustomInstructionKeyframeHandler(event -> {
-            if (event.getKeyframeData().getInstructions().equals("completeHarvest")) {}
+            if (event.keyframeData().getInstructions().equals("completeHarvest")) {}
         });
-        setParticleKeyframeHandler(event -> {
-            if (animatable.isFestive() && event.getKeyframeData().getEffect().equals("strawgolem:snow")) animatable.createSnow = true;
-        });
+        // Disabling this for now.
+//        setParticleKeyframeHandler(event -> {
+//            event.
+//            if (event.isFestive() && event.keyframeData().getEffect().equals("strawgolem:snow")) animatable.createSnow = true;
+//        });
 
 
     }
