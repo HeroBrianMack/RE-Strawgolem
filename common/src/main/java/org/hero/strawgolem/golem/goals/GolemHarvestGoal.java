@@ -6,7 +6,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.item.ItemNameBlockItem;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
@@ -24,6 +24,8 @@ import org.hero.strawgolem.golem.api.VisionHelper;
 
 import java.util.Collections;
 import java.util.Queue;
+
+import static org.hero.strawgolem.golem.api.ItemHelper.isSeed;
 
 public class GolemHarvestGoal extends GolemMoveToBlockGoal {
     private StrawGolem golem;
@@ -228,7 +230,10 @@ public class GolemHarvestGoal extends GolemMoveToBlockGoal {
 
     // Checking if an ItemStack is a crop drop and not seeds.
     private boolean isCropDrop(ItemStack item) {
-        return !(item.getItem() instanceof ItemNameBlockItem)
+        // If item is a Crop Block (Seed) or StemBlock (Other seed)
+        // This shouldn't affect how golems harvest berries and nether wart,
+        // regardless of it returning true or false.
+        return !(item.getItem() instanceof BlockItem block && isSeed(block))
                 || item.getItem().components().has(DataComponents.FOOD);
     }
 

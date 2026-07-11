@@ -3,6 +3,7 @@ package org.hero.strawgolem.mixin;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Blocks;
@@ -56,7 +57,7 @@ public abstract class MixinPumpkin {
     private void trySpawnGolem(Level pLevel, BlockPos pPos, CallbackInfo ci) {
         BlockPattern.BlockPatternMatch patternMatch = this.strawgolem$getOrCreateStrawGolemFull().find(pLevel, pPos);
         if (patternMatch != null) {
-            StrawGolem strawGolem = STRAWGOLEM.get().create(pLevel);
+            StrawGolem strawGolem = STRAWGOLEM.get().create(pLevel, EntitySpawnReason.TRIGGERED);
             if (strawGolem != null) {
                 spawnGolemInWorld(pLevel, patternMatch, strawGolem, patternMatch.getBlock(0, 1, 0).getPos());
             }

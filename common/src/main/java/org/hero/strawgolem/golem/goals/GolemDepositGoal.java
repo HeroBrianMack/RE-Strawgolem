@@ -95,7 +95,9 @@ public class GolemDepositGoal extends GolemMoveToBlockGoal {
 
             ResourceLocation location = BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(block.getType());
             if (location == null) return null;
-            return BuiltInRegistries.SOUND_EVENT.get(ResourceLocation.tryParse("block." + location.getPath() + ".open"));
+            return BuiltInRegistries.SOUND_EVENT.get(
+                    ResourceLocation.tryParse("block." + location.getPath() + ".open")
+            ).get().value();
         } catch (Throwable e) {
             return null;
         }

@@ -3,7 +3,9 @@ package org.hero.strawgolem.client;
 import net.minecraft.resources.ResourceLocation;
 import org.hero.strawgolem.Constants;
 import org.hero.strawgolem.golem.StrawGolem;
+import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.model.GeoModel;
+import software.bernie.geckolib.renderer.GeoRenderer;
 
 public class GolemModel extends GeoModel<StrawGolem> {
     private static final ResourceLocation model = ResourceLocation.tryBuild(Constants.MODID, "geo/strawgolem.geo.json");
@@ -19,12 +21,12 @@ public class GolemModel extends GeoModel<StrawGolem> {
 
 
     @Override
-    public ResourceLocation getModelResource(StrawGolem strawGolem) {
+    public ResourceLocation getModelResource(StrawGolem strawGolem, @Nullable GeoRenderer<StrawGolem> renderer) {
         return model;
     }
 
     @Override
-    public ResourceLocation getTextureResource(StrawGolem strawGolem) {
+    public ResourceLocation getTextureResource(StrawGolem strawGolem, @Nullable GeoRenderer<StrawGolem> renderer) {
         return textures[strawGolem.healthStatus() + (strawGolem.isFestive() ? 3 : 0)];
     }
 

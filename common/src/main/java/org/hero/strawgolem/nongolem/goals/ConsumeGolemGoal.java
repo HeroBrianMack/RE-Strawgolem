@@ -22,8 +22,11 @@ public class ConsumeGolemGoal extends MeleeAttackGoal {
         // Only adding the null check here as things tend to ignore the nonnull either on accident or purpose.
         if (this.canPerformAttack(pTarget) && pTarget instanceof StrawGolem) {
             this.resetAttackCooldown();
-            // Not of fan of this sfx, but for now it'll do.
-            mob.playSound(SoundEvents.GENERIC_EAT, 2, 0.5f);
+            // Make sure the SoundEvent is not null for safety.
+            if (SoundEvents.GENERIC_EAT.isBound()) {
+                // Not of fan of this sfx, but for now it'll do.
+                mob.playSound(SoundEvents.GENERIC_EAT.value(), 2, 0.5f);
+            }
             // May adjust attack range, currently a bit strong
             pTarget.hurt(pTarget.level().damageSources().mobAttack(mob), 0.5F);
             // Straw Golem is most certainly scaredc after being attacked.

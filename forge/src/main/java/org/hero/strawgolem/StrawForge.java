@@ -4,7 +4,6 @@ import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.item.ArmorMaterial;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -26,18 +25,16 @@ public class StrawForge {
     public static final DeferredRegister<ParticleType<?>> PARTICLES = DeferredRegister.create(Registries.PARTICLE_TYPE, Constants.MODID);
 
     public static final DeferredRegister<CreativeModeTab> CREATIVE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, Constants.MODID);
-    public static final DeferredRegister<ArmorMaterial> ARMOR_MATERIALS = DeferredRegister.create(Registries.ARMOR_MATERIAL, Constants.MODID);
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(Registries.ITEM, Constants.MODID);
 
-    public StrawForge() {
-        final IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+    public StrawForge(FMLJavaModLoadingContext context) {
+        final IEventBus modEventBus = context.getModEventBus();
 
         SOUND_EVENTS.register(modEventBus);
         BLOCKS.register(modEventBus);
         BLOCK_ENTITIES.register(modEventBus);
         ENTITIES.register(modEventBus);
         CREATIVE_TABS.register(modEventBus);
-        ARMOR_MATERIALS.register(modEventBus);
         ITEMS.register(modEventBus);
         PARTICLES.register(modEventBus);
         modEventBus.<EntityAttributeCreationEvent>addListener(event -> EntityRegistry.registerEntityAttributes(event::put));

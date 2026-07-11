@@ -64,10 +64,10 @@ public class Constants {
                      LOG.error("Resource location for {} not found!", str);
                  } else {
                      try {
-                         if (BuiltInRegistries.ITEM.get(location) instanceof BlockItem block) {
+                         if (BuiltInRegistries.ITEM.get(location).get().value() instanceof BlockItem block) {
                              set.add(block.getBlock());
-                         } else if (BuiltInRegistries.BLOCK.get(location) != Blocks.AIR){
-                             set.add(BuiltInRegistries.BLOCK.get(location));
+                         } else if (BuiltInRegistries.BLOCK.get(location).get().value() != Blocks.AIR){
+                             set.add(BuiltInRegistries.BLOCK.get(location).get().value());
                          }
                      } catch (Exception e) {
                          LOG.error("Unable to find the block for the resource location!");
@@ -86,7 +86,7 @@ public class Constants {
                     LOG.error("Resource location for {} not found!", str);
                 } else {
                     try {
-                        set.add(BuiltInRegistries.ITEM.get(location));
+                        set.add(BuiltInRegistries.ITEM.get(location).get().value());
                     } catch (Exception e) {
                         LOG.error("Unable to find the item for the resource location!");
                     }

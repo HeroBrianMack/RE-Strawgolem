@@ -1,6 +1,9 @@
 package org.hero.strawgolem.registry;
 
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
@@ -26,10 +29,16 @@ public class ItemRegistry {
                         .build()
         );
     }
-    public static final Supplier<Item> STRAW_HAT = registerItem("straw_hat", () -> new Item(new Item.Properties()
-            .stacksTo(1)));
-    private static <T extends Item> Supplier<T> registerItem(String name, Supplier<T> item) {
-        return Constants.COMMON_PLATFORM.registerItem(name, item);
+    public static final Supplier<Item> STRAW_HAT = registerItem("straw_hat", new Item.Properties()
+            .stacksTo(1));
+    private static Supplier<Item> registerItem(String name, Item.Properties prop) {
+        return Constants.COMMON_PLATFORM.registerItem(name, () ->
+                new Item(prop.setId(
+                        ResourceKey.create(Registries.ITEM,
+                        ResourceLocation.fromNamespaceAndPath(
+                                Constants.MODID, name)
+                        )
+                )));
     }
 
 }

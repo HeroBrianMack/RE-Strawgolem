@@ -169,7 +169,7 @@ public class GolemGrabGoal extends GolemMoveToBlockGoal {
         ResourceLocation location = ResourceLocation.tryParse("crops");
         if (location == null) return;
         try {
-            for (Holder<Block> blockHolder : BuiltInRegistries.BLOCK.getTag(TagKey.create(Registries.BLOCK,
+            for (Holder<Block> blockHolder : BuiltInRegistries.BLOCK.get(TagKey.create(Registries.BLOCK,
                     location)).get().stream().toList()) {
                 if (blockHolder.value() instanceof StemFruit fruitStem) {
                     Item item = fruitStem.strawgolemRewrite$getFruit().asItem();

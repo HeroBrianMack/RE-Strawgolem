@@ -32,13 +32,13 @@ public abstract class GolemMoveToBlockGoal extends MoveToBlockGoal {
         Vec3 nudgeDir = Vec3.ZERO;
         Direction dir = golem.getDirection();
         if (dir == Direction.NORTH) {
-            nudgeDir = Vec3.atLowerCornerOf(Direction.WEST.getNormal());
+            nudgeDir = Vec3.atLowerCornerOf(Direction.WEST.getUnitVec3i());
         } else if (dir == Direction.SOUTH) {
-            nudgeDir = Vec3.atLowerCornerOf(Direction.EAST.getNormal());
+            nudgeDir = Vec3.atLowerCornerOf(Direction.EAST.getUnitVec3i());
         } else if (dir == Direction.WEST) {
-            nudgeDir = Vec3.atLowerCornerOf(Direction.NORTH.getNormal());
+            nudgeDir = Vec3.atLowerCornerOf(Direction.NORTH.getUnitVec3i());
         } else if (dir == Direction.EAST) {
-            nudgeDir = Vec3.atLowerCornerOf(Direction.SOUTH.getNormal());
+            nudgeDir = Vec3.atLowerCornerOf(Direction.SOUTH.getUnitVec3i());
         }
         // Multiplier to reduce the push force from 1 to 0.05.
         double multiplier = 0.05;

@@ -27,6 +27,8 @@ import net.minecraft.world.entity.projectile.Snowball;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.CropBlock;
+import net.minecraft.world.level.block.StemBlock;
 import org.hero.strawgolem.client.GolemArmAnimationController;
 import org.hero.strawgolem.client.GolemHarvestAnimationController;
 import org.hero.strawgolem.client.GolemLegAnimationController;
@@ -41,6 +43,7 @@ import org.hero.strawgolem.golem.goals.*;
 import org.hero.strawgolem.mixinInterfaces.GolemOrderer;
 import org.hero.strawgolem.registry.ItemRegistry;
 import org.hero.strawgolem.registry.SoundRegistry;
+import org.jetbrains.annotations.NotNull;
 import software.bernie.geckolib.animatable.GeoAnimatable;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.animation.AnimatableManager;
@@ -52,6 +55,7 @@ import java.time.Month;
 import java.util.List;
 
 import static org.hero.strawgolem.Constants.*;
+import static org.hero.strawgolem.golem.api.ItemHelper.isSeed;
 
 public class StrawGolem extends AbstractGolem implements GeoAnimatable {
     // Constructor for Straw Golem just uses the super class (needs to be examined for changes in future versions).
@@ -165,19 +169,20 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
     }
 
     @Override
-    protected void dropAllDeathLoot(ServerLevel pLevel, DamageSource pDamageSource) {
+    protected void dropAllDeathLoot(@NotNull ServerLevel pLevel, @NotNull DamageSource pDamageSource) {
         super.dropAllDeathLoot(pLevel, pDamageSource);
         if (hasHat()) {
-            this.spawnAtLocation(ItemRegistry.STRAW_HAT.get());
+            this.spawnAtLocation(pLevel, ItemRegistry.STRAW_HAT.get());
         }
     }
 
     @Override
-    protected void dropEquipment() {
-        super.dropEquipment();
+    protected void dropEquipment(@NotNull ServerLevel level) {
+        super.dropEquipment(level);
         ItemStack itemstack = this.getItemBySlot(EquipmentSlot.MAINHAND);
         if (!itemstack.isEmpty()) {
-            this.spawnAtLocation(itemstack);
+
+            this.spawnAtLocation(level, itemstack);
             this.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
         }
     }
@@ -186,7 +191,7 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
     public void tick() {
         // Tick each feature
         // May need to push all of these onto serverSide
-        if (!level().isClientSide && isAlive())  {
+        if (level() instanceof ServerLevel level && isAlive())  {
             if (random.nextFloat() < 0.02f) {
                 playSound(SoundRegistry.GOLEM_AMBIENT.get());
             }
@@ -194,7 +199,7 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
             if (Golem.panic) {
                 setPanic(isRunningScaredGoal());
                 if (getPanic()) {
-                    dropEquipment();
+                    dropEquipment(level);
                 }
             }
         }
@@ -204,7 +209,7 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
         // Refresh the Straw Golem's carry status based on held item.
 
         // If the Straw Golem is holding a Block.
-        if (item instanceof BlockItem && !(item instanceof ItemNameBlockItem)) setCarryStatus(2);
+        if (item instanceof BlockItem block && !isSeed(block)) setCarryStatus(2);
         // If the Straw Golem is holding a regular item.
         else if (!getMainHandItem().isEmpty()) setCarryStatus(1);
         // If the Straw Golem is holding nothing.
@@ -298,9 +303,10 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
 
     // may mess with knockback when barreled, or change this to the hurt method...
     @Override
-    protected void actuallyHurt(DamageSource pDamageSource, float pDamageAmount) {
+    protected void actuallyHurt(ServerLevel level, DamageSource pDamageSource, float pDamageAmount) {
         try {
             // If a snowball and the season is Winter.
+            // This method should only be serverlevel, but keeping it for safety.
             if (pDamageSource.getDirectEntity() instanceof Snowball && isWinter() && !this.level().isClientSide) {
                 this.playSound(SoundRegistry.GOLEM_STRAINED.get());
                 entityData.set(FESTIVE, true);
@@ -320,7 +326,7 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
             playSound(SoundEvents.SHIELD_BREAK);
         }
         this.playSound(SoundRegistry.GOLEM_HURT.get());
-        super.actuallyHurt(pDamageSource, pDamageAmount);
+        super.actuallyHurt(level, pDamageSource, pDamageAmount);
     }
 
 
@@ -457,8 +463,9 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
     public void setPickupStatus(ItemStack item) {
         // If the item is not nothing, continue setting pickup status.
         if (!item.isEmpty()) {
-            // If the item is a type of block, set pickup status to 2.
-            if (item.getItem() instanceof BlockItem && !(item.getItem() instanceof ItemNameBlockItem)) {
+            // If the item is a type of block (not seed!), set pickup status to 2.
+            if (item.getItem() instanceof BlockItem block &&
+                    !isSeed(block)) {
                 setPickupStatus(2);
             }
             else {  // Else set pickup status to 1 to indicate a regular item.
@@ -535,7 +542,8 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
      * @return Whether the Straw Golem is cold.
      */
     private boolean isCold() {
-        return !this.level().getBiome(this.blockPosition()).value().warmEnoughToRain(this.blockPosition());
+        return !level().getBiome(this.blockPosition()).value().
+                warmEnoughToRain(this.blockPosition(), level().getSeaLevel());
     }
 
     // May make barrel ignore cold shivering?

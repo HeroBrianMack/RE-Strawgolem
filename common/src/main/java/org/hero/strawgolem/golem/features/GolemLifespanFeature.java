@@ -1,5 +1,6 @@
 package org.hero.strawgolem.golem.features;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import org.hero.strawgolem.Constants;
 import org.hero.strawgolem.golem.StrawGolem;
@@ -31,7 +32,9 @@ public class GolemLifespanFeature implements IGolemTickFeature {
         if (Constants.Golem.lifespan) {
             if (golem.getLifeSpan() >= Constants.Golem.maxLife) {
                 // Kill golem if its lived past its maximum lifespan
-                golem.kill();
+                if (golem.level() instanceof ServerLevel level) {
+                    golem.kill(level);
+                }
                 return;
             } else if (golem.getLifeSpan() < 0) {
                 // Should never trigger, but better to be cautious
