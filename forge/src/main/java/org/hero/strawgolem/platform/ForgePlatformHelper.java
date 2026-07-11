@@ -1,13 +1,11 @@
 package org.hero.strawgolem.platform;
 
-import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.item.ArmorMaterial;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.SpawnEggItem;
@@ -59,11 +57,6 @@ public class ForgePlatformHelper implements IPlatformHelper {
     @Override
     public <T extends Entity> Supplier<EntityType<T>> registerEntity(String id, Supplier<EntityType<T>> entity) {
         return StrawForge.ENTITIES.register(id, entity);
-    }
-
-    @Override
-    public <T extends ArmorMaterial> Holder<T> registerArmorMaterial(String id, Supplier<T> armorMaterial) {
-        return StrawForge.ARMOR_MATERIALS.register(id, armorMaterial).getHolder().get();
     }
 
     @Override

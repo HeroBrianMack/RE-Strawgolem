@@ -13,14 +13,12 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.item.ArmorMaterial;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.neoforged.neoforge.common.DeferredSpawnEggItem;
 
 import java.nio.file.Path;
 import java.util.function.Supplier;
@@ -67,11 +65,6 @@ public class NeoForgePlatformHelper implements IPlatformHelper {
     }
 
     @Override
-    public <T extends ArmorMaterial> Holder<T> registerArmorMaterial(String id, Supplier<T> armorMaterial) {
-        return (Holder<T>) StrawNeo.ARMOR_MATERIALS.register(id, armorMaterial);
-    }
-
-    @Override
     public <T extends Item> Supplier<T> registerItem(String id, Supplier<T> item) {
         return StrawNeo.ITEMS.register(id, item);
     }
@@ -88,7 +81,7 @@ public class NeoForgePlatformHelper implements IPlatformHelper {
 
     @Override
     public <E extends Mob> Supplier<SpawnEggItem> makeSpawnEggFor(Supplier<EntityType<E>> entityType, int primaryEggColour, int secondaryEggColour, Item.Properties itemProperties) {
-        return () -> new DeferredSpawnEggItem(entityType, primaryEggColour, secondaryEggColour, itemProperties);
+        return () -> new SpawnEggItem(entityType.get(), primaryEggColour, secondaryEggColour, itemProperties);
     }
 
     @Override
