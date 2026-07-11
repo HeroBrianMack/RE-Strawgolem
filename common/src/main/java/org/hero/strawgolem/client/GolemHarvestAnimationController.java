@@ -25,7 +25,11 @@ public class GolemHarvestAnimationController extends AnimationController<StrawGo
             if (controller.getAnimationState().equals(State.STOPPED)) {
                 controller.forceAnimationReset();
             }
-            if (golem.hasBarrel() && status < 2) status++;
+            if (golem.hasBarrel() && status < 1) status++;
+            // This section has been overcomplicated, but it does work.
+            if (status < 0) status = 0;
+            else if (status >= harvest.length) status = 1;
+
             return event.setAndContinue(harvest[status]);
 
         }
