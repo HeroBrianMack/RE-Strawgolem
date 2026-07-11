@@ -12,7 +12,6 @@ import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraftforge.common.ForgeSpawnEggItem;
 import net.minecraftforge.fml.loading.FMLPaths;
 import org.hero.strawgolem.StrawForge;
 import org.hero.strawgolem.platform.services.IPlatformHelper;
@@ -80,8 +79,8 @@ public class ForgePlatformHelper implements IPlatformHelper {
     }
 
     @Override
-    public <E extends Mob> Supplier<SpawnEggItem> makeSpawnEggFor(Supplier<EntityType<E>> entityType, int primaryEggColour, int secondaryEggColour, Item.Properties itemProperties) {
-        return () -> new ForgeSpawnEggItem(entityType, primaryEggColour, secondaryEggColour, itemProperties);
+    public <E extends Mob> Supplier<SpawnEggItem> makeSpawnEggFor(Supplier<EntityType<E>> entityType, Item.Properties itemProperties) {
+        return () -> new SpawnEggItem(entityType.get(), itemProperties);
     }
 
     @Override
