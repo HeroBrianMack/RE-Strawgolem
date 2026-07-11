@@ -221,7 +221,7 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
         // Get the item the player is holding.
         ItemStack item = pPlayer.getMainHandItem();
         // Currently only doing main hand processing for reduction of bugs/unintended interactions.
-        if (pHand == InteractionHand.MAIN_HAND && item != ItemStack.EMPTY) {
+        if (pHand == InteractionHand.MAIN_HAND && !item.isEmpty()) {
             // If the item is a barrel and the Straw Golem is not wearing a fresh barrel.
             if (item.is(Items.BARREL) && barrelHP() != Golem.barrelHealth) {
                 // Replace the barrel with the player's held one.
@@ -309,7 +309,7 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
         } catch(Throwable e) {
             LOG.error(e.getMessage());
         }
-        if (barrelHP() - pDamageAmount >= 0) { // barrel blocks the damage.
+        if (barrelHP() - pDamageAmount > 0) { // barrel blocks the damage.
             entityData.set(BARREL, (int) (barrelHP() - pDamageAmount));
             playSound(SoundEvents.SHIELD_BLOCK);
             return;
