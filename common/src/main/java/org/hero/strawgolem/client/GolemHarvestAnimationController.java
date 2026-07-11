@@ -26,6 +26,9 @@ public class GolemHarvestAnimationController extends AnimationController<StrawGo
                 controller.forceAnimationReset();
             }
             if (golem.hasBarrel() && status < 2) status++;
+            // This section has been overcomplicated, but it does work.
+            status = Math.max(0, Math.min(harvest.length - 1, status));
+
             return event.setAndContinue(harvest[status]);
 
         }
