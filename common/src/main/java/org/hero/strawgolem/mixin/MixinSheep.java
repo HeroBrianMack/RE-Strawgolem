@@ -26,7 +26,7 @@ public class MixinSheep extends Mob {
             // Don't believe the cast is needed....
             this.goalSelector.addGoal(5, new ConsumeGolemGoal((Sheep)(Object)this, true));
             this.targetSelector.addGoal(5, // Check if <> breaks anything, it shouldn't in theory
-                    new NearestAttackableTargetGoal<>((Sheep)(Object)this, StrawGolem.class, true));
+                    new NearestAttackableTargetGoal<>((Sheep)(Object)this, StrawGolem.class, 10, true, false, (e) -> e instanceof StrawGolem golem && golem.isEdibleGolem()));
         }
     }
 

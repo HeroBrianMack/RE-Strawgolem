@@ -14,13 +14,13 @@ public class ConsumeGolemGoal extends MeleeAttackGoal {
 
     @Override
     public boolean canUse() {
-        return super.canUse() && mob.getTarget() instanceof StrawGolem;
+        return super.canUse() && mob.getTarget() instanceof StrawGolem golem && golem.isEdibleGolem();
     }
 
     @Override
     protected void checkAndPerformAttack(LivingEntity pTarget) {
         // Only adding the null check here as things tend to ignore the nonnull either on accident or purpose.
-        if (this.canPerformAttack(pTarget) && pTarget instanceof StrawGolem) {
+        if (this.canPerformAttack(pTarget) && pTarget instanceof StrawGolem golem && golem.isEdibleGolem()) {
             this.resetAttackCooldown();
             // Not of fan of this sfx, but for now it'll do.
             mob.playSound(SoundEvents.GENERIC_EAT, 2, 0.5f);
