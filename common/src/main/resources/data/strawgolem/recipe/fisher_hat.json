@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "strawgolem:straw_hat"
+    },
+    {
+      "tag": "minecraft:fishes"
+    }
+  ],
+  "result": {
+    "id": "strawgolem:fisher_hat",
+    "count": 1
+  }
+}

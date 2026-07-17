@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " W ",
+    " S ",
+    " M "
+  ],
+  "key": {
+    "W": {
+      "item": "minecraft:wheat"
+    },
+    "S": {
+      "item": "minecraft:stick"
+    },
+    "M": {
+      "item": "minecraft:milk_bucket"
+    }
+  },
+  "result": {
+    "id": "strawgolem:golem_retrainer",
+    "count": 1
+  }
+}
