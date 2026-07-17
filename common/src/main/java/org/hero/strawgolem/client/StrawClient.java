@@ -15,5 +15,14 @@ public class StrawClient {
                                          BiConsumer<BlockEntityType<? extends BlockEntity>, BlockEntityRendererProvider> blockEntityRenderers) {
         Constants.LOG.debug("Registering Renderers");
         entityRenderers.accept(EntityRegistry.STRAWGOLEM.get(), GolemRenderer::new);
+        entityRenderers.accept(EntityRegistry.BREEDERGOLEM.get(), GolemRenderer::new);
+        entityRenderers.accept(EntityRegistry.STOCKGOLEM.get(), GolemRenderer::new);
+        entityRenderers.accept(EntityRegistry.MINERGOLEM.get(), GolemRenderer::new);
+        entityRenderers.accept(EntityRegistry.BEEKEEPERGOLEM.get(), GolemRenderer::new);
+        entityRenderers.accept(EntityRegistry.FISHERGOLEM.get(), GolemRenderer::new);
+        entityRenderers.accept(EntityRegistry.LUMBERJACKGOLEM.get(), GolemRenderer::new);
+        entityRenderers.accept(EntityRegistry.SMELTERGOLEM.get(), GolemRenderer::new);
+        entityRenderers.accept(EntityRegistry.EXCAVATORGOLEM.get(), GolemRenderer::new);
+        entityRenderers.accept(EntityRegistry.COOKGOLEM.get(), GolemRenderer::new);
     }
 }
