@@ -47,10 +47,7 @@ public abstract class MixinPumpkin {
 
     @ModifyReturnValue(method = "canSpawnGolem", at = @At("RETURN"))
     private boolean modifyCanSpawnGolem(boolean original, LevelReader pLevel, BlockPos pPos) {
-        if (!original) {
-            return strawgolem$getOrCreateStrawGolemBase().find(pLevel, pPos) != null;
-        }
-        return true; // original was already true
+        return original || strawgolem$getOrCreateStrawGolemBase().find(pLevel, pPos) != null;
     }
 
     @Inject(method = "trySpawnGolem", at = @At("HEAD"))
