@@ -148,7 +148,7 @@ public class GolemHarvestGoal extends GolemMoveToBlockGoal {
         }
         if (state.getBlock() instanceof CropBlock crop) {
             return crop.isMaxAge(state);
-        } else if (state.getBlock() instanceof BushBlock bush && !(bush instanceof StemBlock)) {
+        } else if (state.getBlock() instanceof VegetationBlock bush && !(bush instanceof StemBlock)) {
             for (var prop : state.getProperties()) {
                 // I wish there was a fruit-bearing bush class...
                 if (prop instanceof IntegerProperty intProp && prop.getName().equals("age")
