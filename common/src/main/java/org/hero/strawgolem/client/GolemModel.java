@@ -3,13 +3,13 @@ package org.hero.strawgolem.client;
 import net.minecraft.resources.ResourceLocation;
 import org.hero.strawgolem.Constants;
 import org.hero.strawgolem.golem.StrawGolem;
-import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.model.GeoModel;
-import software.bernie.geckolib.renderer.GeoRenderer;
+import software.bernie.geckolib.renderer.base.GeoRenderState;
+import static org.hero.strawgolem.registry.DataTicketsRegistry.*;
 
 public class GolemModel extends GeoModel<StrawGolem> {
-    private static final ResourceLocation model = ResourceLocation.tryBuild(Constants.MODID, "geo/strawgolem.geo.json");
-    private static final ResourceLocation animation = ResourceLocation.tryBuild(Constants.MODID, "animations/strawgolem.animation.json");
+    private static final ResourceLocation model = ResourceLocation.tryBuild(Constants.MODID, "strawgolem.geo.json");
+    private static final ResourceLocation animation = ResourceLocation.tryBuild(Constants.MODID, "strawgolem.animation.json");
     private static final ResourceLocation[] textures = {
             ResourceLocation.tryBuild(Constants.MODID, "textures/straw_golem.png"),
             ResourceLocation.tryBuild(Constants.MODID, "textures/straw_golem_old.png"),
@@ -21,13 +21,18 @@ public class GolemModel extends GeoModel<StrawGolem> {
 
 
     @Override
-    public ResourceLocation getModelResource(StrawGolem strawGolem, @Nullable GeoRenderer<StrawGolem> renderer) {
+    public ResourceLocation getModelResource(GeoRenderState state) {
         return model;
     }
 
     @Override
-    public ResourceLocation getTextureResource(StrawGolem strawGolem, @Nullable GeoRenderer<StrawGolem> renderer) {
-        return textures[strawGolem.healthStatus() + (strawGolem.isFestive() ? 3 : 0)];
+    public ResourceLocation getTextureResource(GeoRenderState state) {
+        var healthStatus = state.getGeckolibData(HEALTH);
+        var festive = state.getGeckolibData(FESTIVE);
+        if (healthStatus == null || festive == null) {
+            return textures[0];
+        }
+        return textures[healthStatus + (festive ? 3 : 0)];
     }
 
     @Override
