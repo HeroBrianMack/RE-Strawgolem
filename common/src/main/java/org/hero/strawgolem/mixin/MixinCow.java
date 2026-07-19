@@ -3,7 +3,7 @@ package org.hero.strawgolem.mixin;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
-import net.minecraft.world.entity.animal.Cow;
+import net.minecraft.world.entity.animal.AbstractCow;
 import net.minecraft.world.level.Level;
 import org.hero.strawgolem.Constants;
 import org.hero.strawgolem.golem.StrawGolem;
@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(Cow.class)
+@Mixin(AbstractCow.class)
 public class MixinCow extends Mob {
 
     protected MixinCow(EntityType<? extends Mob> pEntityType, Level pLevel) {
@@ -23,9 +23,9 @@ public class MixinCow extends Mob {
     @Inject(method = "registerGoals", at = @At("TAIL"))
     private void registerGoals(CallbackInfo ci) {
         if (Constants.Golem.animalAggro) {
-            this.goalSelector.addGoal(5, new ConsumeGolemGoal((Cow)(Object)this, true));
+            this.goalSelector.addGoal(5, new ConsumeGolemGoal((AbstractCow)(Object)this, true));
             this.targetSelector.addGoal(5, // Check if <> breaks anything, it shouldn't in theory
-                    new NearestAttackableTargetGoal<>((Cow)(Object)this, StrawGolem.class, true));
+                    new NearestAttackableTargetGoal<>((AbstractCow)(Object)this, StrawGolem.class, true));
         }
     }
 }

@@ -3,7 +3,7 @@ package org.hero.strawgolem.mixin;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
-import net.minecraft.world.entity.animal.Sheep;
+import net.minecraft.world.entity.animal.sheep.Sheep;
 import net.minecraft.world.level.Level;
 import org.hero.strawgolem.Constants;
 import org.hero.strawgolem.golem.StrawGolem;
