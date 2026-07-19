@@ -2,115 +2,119 @@ package org.hero.strawgolem.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.datafixers.util.Either;
 import com.mojang.math.Axis;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.util.Mth;
-import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.phys.Vec3;
 import org.hero.strawgolem.Constants;
-import org.hero.strawgolem.client.particle.SimplerParticleType;
 import org.hero.strawgolem.golem.StrawGolem;
 import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.cache.object.GeoBone;
+import software.bernie.geckolib.renderer.GeoEntityRenderer;
+import software.bernie.geckolib.renderer.base.GeoRenderState;
 import software.bernie.geckolib.renderer.layer.BlockAndItemGeoLayer;
-import software.bernie.geckolib.renderer.specialty.DynamicGeoEntityRenderer;
-import static org.hero.strawgolem.registry.ParticleRegistry.snow;
-import static org.hero.strawgolem.registry.ParticleRegistry.snowfall;
 
-public class GolemRenderer extends DynamicGeoEntityRenderer<StrawGolem> {
+import java.util.List;
+
+import static org.hero.strawgolem.registry.DataTicketsRegistry.*;
+
+public class GolemRenderer<R extends LivingEntityRenderState & GeoRenderState>
+        extends GeoEntityRenderer<StrawGolem, R> {
 
     public GolemRenderer(EntityRendererProvider.Context renderManager) {
         super(renderManager, new GolemModel());
+
         addRenderLayer(new BlockAndItemGeoLayer<>(this) {
-            @Nullable
+            // Name of the item bone that displays Straw Golem's held item.
+            private final String itemBone = "item";
+
             @Override
-            protected ItemStack getStackForBone(GeoBone bone, StrawGolem golem) {
-                // Retrieve the items in the golem's hands for the relevant bone
-                if (bone.getName().equals("item")) {
-                    return golem.getItemBySlot(EquipmentSlot.MAINHAND);
-                } else {
-                    return null;
-                }
+            protected List<BlockAndItemGeoLayer.RenderData<R>> getRelevantBones(R renderState, BakedGeoModel model) {
+                return List.of(renderDataForGolem(this.itemBone));
+            }
+
+            private static <R extends GeoRenderState> BlockAndItemGeoLayer.RenderData<R> renderDataForGolem(String boneName) {
+                ItemDisplayContext context = ItemDisplayContext.NONE;
+                return new BlockAndItemGeoLayer.RenderData<>(boneName, context, (bone, renderState2) ->
+                        Either.left(renderState2.getGeckolibData(ITEM)));
             }
 
             @Override
-            protected void renderStackForBone(PoseStack poseStack, GeoBone bone, ItemStack stack, StrawGolem golem, MultiBufferSource bufferSource, float partialTick, int packedLight, int packedOverlay) {
-                if (stack == golem.getItemBySlot(EquipmentSlot.MAINHAND)) {
+            public void addRenderData(StrawGolem animatable, Void relatedObject, R renderState) {
+                var equipment = animatable.getMainHandItem();
+                renderState.addGeckolibData(ITEM, equipment);
+            }
+
+            @Override
+            protected void renderStackForBone(PoseStack poseStack, GeoBone bone, ItemStack stack, ItemDisplayContext displayContext, R renderState, MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
+                // This is essentially undoing
+                if (stack == renderState.getGeckolibData(ITEM)) {
                     poseStack.mulPose(Axis.XP.rotationDegrees(0f));
                     poseStack.scale(0.5f, 0.5f, 0.5f);
                 }
-                super.renderStackForBone(poseStack, bone, stack, animatable, bufferSource, partialTick, packedLight, packedOverlay);
+                // Should be this in super:
+                // Minecraft.getInstance().getItemRenderer().renderStatic(stack, displayContext, packedLight, packedOverlay, poseStack,
+                // bufferSource, ClientUtil.getLevel(),
+                // ((Long)renderState.getGeckolibData(DataTickets.ANIMATABLE_INSTANCE_ID)).intValue());
+                super.renderStackForBone(poseStack, bone, stack, displayContext, renderState, bufferSource, packedLight, packedOverlay);
             }
         });
     }
 
     @Override
-    public void preRender(PoseStack poseStack, StrawGolem animatable, BakedGeoModel model, @Nullable MultiBufferSource bufferSource, @Nullable VertexConsumer buffer, boolean isReRender, float partialTick, int packedLight, int packedOverlay, int colour) {
-        getGeoModel().getAnimationProcessor().getBone("hat").setHidden(!animatable.hasHat());
-        getGeoModel().getAnimationProcessor().getBone("dynamicsnow").setHidden(!animatable.isFestive());
-        getGeoModel().getAnimationProcessor().getBone("snow").setHidden(!animatable.isFestive() || !animatable.hasHat());
-        getGeoModel().getAnimationProcessor().getBone("barrel").setHidden(!animatable.hasBarrel());
+    public void addRenderData(StrawGolem animatable, Void relatedObject, R renderState) {
+        // Adding relevant data for rendering here.
+        renderState.addGeckolibData(FESTIVE, animatable.isFestive());
+        renderState.addGeckolibData(SHIVER, animatable.shouldShiver());
+        renderState.addGeckolibData(HAT, animatable.hasHat());
+        renderState.addGeckolibData(BARREL, animatable.hasBarrel());
+
+        renderState.addGeckolibData(HEALTH, animatable.healthStatus());
+        renderState.addGeckolibData(YROT, animatable.getYRot());
+
+        renderState.addGeckolibData(POSITION, animatable.position());
+        renderState.addGeckolibData(ANGLE, animatable.getLookAngle());
+        renderState.addGeckolibData(ITEM, animatable.getMainHandItem());
+    }
+
+    @Override
+    public void preRender(R renderState, PoseStack poseStack, BakedGeoModel model, @Nullable MultiBufferSource bufferSource, @Nullable VertexConsumer buffer, boolean isReRender, int packedLight, int packedOverlay, int renderColor) {
+        // I'm going to not check for null here, it should be not possible for nulls to occur.
+        final var hat = renderState.getGeckolibData(HAT);
+        final var festive = renderState.getGeckolibData(FESTIVE);
+        final var barrel = renderState.getGeckolibData(BARREL);
+        getGeoModel().getAnimationProcessor().getBone("hat").setHidden(!hat);
+        getGeoModel().getAnimationProcessor().getBone("dynamicsnow").setHidden(!festive);
+        getGeoModel().getAnimationProcessor().getBone("snow").setHidden(!festive || !hat);
+        getGeoModel().getAnimationProcessor().getBone("barrel").setHidden(!barrel);
 
         GeoBone bon = getGeoModel().getAnimationProcessor().getBone("locator");
         if (bon != null) bon.getLocalPosition();
-        super.preRender(poseStack, animatable, model, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, colour);
 
+        super.preRender(renderState, poseStack, model, bufferSource, buffer, isReRender, packedLight, packedOverlay, renderColor);
     }
 
     @Override
-    public void actuallyRender(PoseStack poseStack, StrawGolem animatable, BakedGeoModel model, @Nullable RenderType renderType, MultiBufferSource bufferSource, @Nullable VertexConsumer buffer, boolean isReRender, float partialTick, int packedLight, int packedOverlay, int colour) {
+    public void actuallyRender(R renderState, PoseStack poseStack, BakedGeoModel model, @Nullable RenderType renderType, MultiBufferSource bufferSource, @Nullable VertexConsumer buffer, boolean isReRender, int packedLight, int packedOverlay, int renderColor) {
         getGeoModel().getAnimationProcessor().getBone("locator");
-        if (Constants.Golem.shiver && animatable.shouldShiver()) {
-            double deltaX = animatable.getRandom().nextDouble() * 0.02;
-            double deltaZ = animatable.getRandom().nextDouble() * 0.02;
+        if (Constants.Golem.shiver && renderState.getGeckolibData(SHIVER)) {
+            // Trying out just using Math.random here.
+            var random = RandomSource.create();
+            double deltaX = random.nextDouble() * 0.02;
+            double deltaZ = random.nextDouble()  * 0.02;
             poseStack.translate(deltaX, 0, deltaZ);
         }
-        super.actuallyRender(poseStack, animatable, model, renderType, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, colour);
+        super.actuallyRender(renderState, poseStack, model, renderType, bufferSource, buffer, isReRender, packedLight, packedOverlay, renderColor);
     }
 
     @Override
-    public void renderFinal(PoseStack poseStack, StrawGolem animatable, BakedGeoModel model, MultiBufferSource bufferSource, @Nullable VertexConsumer buffer, float partialTick, int packedLight, int packedOverlay, int colour) {
-        if (animatable.createSnow) {
-            animatable.createSnow = false;
-            spawnParticleAtLocator(animatable, "locator", (SimplerParticleType) snow.get(), (SimplerParticleType) snowfall.get(), poseStack);
-        }
-        super.renderFinal(poseStack, animatable, model, bufferSource, buffer, partialTick, packedLight, packedOverlay, colour);
-    }
-
-
-    public void spawnParticleAtLocator(StrawGolem golem, String locatorName, SimplerParticleType snow, SimplerParticleType snowfall, PoseStack poseStack) {
-        if (!golem.level().isClientSide) return;
-        GeoBone bon = getGeoModel().getAnimationProcessor().getBone(locatorName);
-        if (bon == null) return;
-        // Convert to world coordinates
-        Vec3 pos = golem.position().add(new Vec3(-bon.getModelPosition().x / 16.0, bon.getModelPosition().y / 16.0, bon.getModelPosition().z / 16.0).yRot((float) Math.toRadians(-golem.getYRot() + 180)));
-        double x = pos.x;
-        double y = pos.y;
-        double z = pos.z;
-        double speed = 1.0;
-        Vec3 lookAngle = golem.getLookAngle();
-        // Just to make the particles have the correct movement
-        double velX = lookAngle.x * speed;
-        double velZ = lookAngle.z * speed;
-        if (golem.level().isClientSide) {
-            for (int i = 0; i < 3; i++) {
-                // Just a note: 0.4 is spawn diameter
-                double offsetX = (golem.level().random.nextDouble() - 0.5) * 0.4;
-                double offsetZ = (golem.level().random.nextDouble() - 0.5) * 0.4;
-                Minecraft.getInstance().particleEngine.createParticle(snowfall, x + offsetX, y, z + offsetZ, velX * 2, 0, velZ * 2);
-            }
-            for (int i = 0; i < 100; i++) {
-                // Just a note: 0.4 is spawn diameter
-                double offsetX = (golem.level().random.nextDouble() - 0.5) * 0.4;
-                double offsetZ = (golem.level().random.nextDouble() - 0.5) * 0.4;
-                Minecraft.getInstance().particleEngine.createParticle(snow, x + offsetX, y, z + offsetZ, velX, 0, velZ);
-
-            }
-        }
+    public void renderFinal(R renderState, PoseStack poseStack, BakedGeoModel model, MultiBufferSource bufferSource, @Nullable VertexConsumer buffer, int packedLight, int packedOverlay, int renderColor) {
+        super.renderFinal(renderState, poseStack, model, bufferSource, buffer, packedLight, packedOverlay, renderColor);
     }
 }
