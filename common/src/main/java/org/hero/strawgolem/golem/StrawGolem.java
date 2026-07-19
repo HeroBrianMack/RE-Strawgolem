@@ -90,8 +90,6 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
 
     // Variable for forcing Straw Golem animation resets.
     private boolean forceAnimationReset = false;
-    // Variable for determining whether Straw Golem is creating snow particles.
-    public boolean createSnow = false;
 
     @Override
     protected void registerGoals() {

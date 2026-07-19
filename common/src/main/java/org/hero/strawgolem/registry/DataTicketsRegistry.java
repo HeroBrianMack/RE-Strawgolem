@@ -8,7 +8,6 @@ public class DataTicketsRegistry {
     public static void init() {}
     // Boolean statuses of Straw Golem
     public static final DataTicket<Boolean> FESTIVE = DataTicket.create("golemIsFestive", Boolean.class);
-    public static final DataTicket<Boolean> SNOW = DataTicket.create("golemSnow", Boolean.class);
     public static final DataTicket<Boolean> SHIVER = DataTicket.create("golemShiver", Boolean.class);
     public static final DataTicket<Boolean> HAT = DataTicket.create("golemHat", Boolean.class);
     public static final DataTicket<Boolean> BARREL = DataTicket.create("golemBarrel", Boolean.class);
