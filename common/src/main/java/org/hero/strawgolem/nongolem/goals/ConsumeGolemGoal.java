@@ -1,5 +1,6 @@
 package org.hero.strawgolem.nongolem.goals;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
@@ -28,7 +29,10 @@ public class ConsumeGolemGoal extends MeleeAttackGoal {
                 mob.playSound(SoundEvents.GENERIC_EAT.value(), 2, 0.5f);
             }
             // May adjust attack range, currently a bit strong
-            pTarget.hurt(pTarget.level().damageSources().mobAttack(mob), 0.5F);
+            if (pTarget.level() instanceof ServerLevel lvl) {
+                pTarget.hurtServer(lvl, pTarget.level().damageSources().mobAttack(mob), 0.5F);
+            }
+
             // Straw Golem is most certainly scaredc after being attacked.
             pTarget.playSound(SoundRegistry.GOLEM_SCARED.get());
             // Currently allows persistent attacks, considering loss of aggro after one bite.
