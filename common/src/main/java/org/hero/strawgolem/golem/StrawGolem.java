@@ -1,7 +1,6 @@
 package org.hero.strawgolem.golem;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -27,8 +26,8 @@ import net.minecraft.world.entity.projectile.Snowball;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
-import net.minecraft.world.level.block.CropBlock;
-import net.minecraft.world.level.block.StemBlock;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.hero.strawgolem.client.GolemArmAnimationController;
 import org.hero.strawgolem.client.GolemHarvestAnimationController;
 import org.hero.strawgolem.client.GolemLegAnimationController;
@@ -335,26 +334,29 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
         playSound(SoundRegistry.GOLEM_DEATH.get());
     }
 
+//    @Override
+//    protected void readAdditionalSaveData(ValueInput input) {
+//        super.readAdditionalSaveData(input);
+//    }
+
     @Override
-    public void readAdditionalSaveData(CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
+    public void readAdditionalSaveData(ValueInput input) {
+        super.readAdditionalSaveData(input);
         // Checking if golem speed needs fixed
         // Hat!
-        this.entityData.set(HAT, tag.getBoolean("hat").orElse(hasHat()));
-        this.entityData.set(FESTIVE, tag.getBoolean("festive").orElse(isFestive()));
-        // I don't think it's necessary to keep golem panicking?
-//        this.entityData.set(PANIC, tag.getBoolean("panic"));
-        this.entityData.set(CARRY_STATUS, tag.getInt("carry").orElse(carryStatus()));
+        this.entityData.set(HAT, input.getBooleanOr("hat", hasHat()));
+        this.entityData.set(FESTIVE, input.getBooleanOr("festive", isFestive()));
+        this.entityData.set(CARRY_STATUS, input.getInt("carry").orElse(carryStatus()));
         // Barrel!
-        this.entityData.set(BARREL, tag.getInt("barrelHP").orElse(barrelHP()));
-        this.entityData.set(HUNGER, tag.getInt("hunger").orElse(getHunger()));
-        this.entityData.set(LIFE_SPAN, tag.getInt("lifespan").orElse(getLifeSpan()));
-        this.entityData.set(PRIORITY_POS, BlockPos.of(tag.getLong("priorityPos")
+        this.entityData.set(BARREL, input.getInt("barrelHP").orElse(barrelHP()));
+        this.entityData.set(HUNGER, input.getInt("hunger").orElse(getHunger()));
+        this.entityData.set(LIFE_SPAN, input.getInt("lifespan").orElse(getLifeSpan()));
+        this.entityData.set(PRIORITY_POS, BlockPos.of(input.getLong("priorityPos")
                 .orElse(getPriorityPos().asLong())));
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag tag) {
+    public void addAdditionalSaveData(ValueOutput tag) {
         // Loading persistent golem data.
         tag.putBoolean("hat", this.hasHat());
         tag.putBoolean("festive", this.entityData.get(FESTIVE));
