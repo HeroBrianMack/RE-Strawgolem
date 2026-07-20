@@ -350,7 +350,7 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
         // Barrel!
         this.entityData.set(BARREL, tag.getInt("barrelHP"));
         this.entityData.set(HUNGER, tag.getInt("hunger"));
-        this.entityData.set(LIFE_SPAN, tag.getInt("hunger"));
+        this.entityData.set(LIFE_SPAN, tag.getInt("lifespan"));
         this.entityData.set(PRIORITY_POS, BlockPos.of(tag.getLong("priorityPos")));
     }
 
@@ -362,6 +362,7 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
         tag.putInt("carry", carryStatus());
         tag.putInt("barrelHP", barrelHP());
         tag.putInt("hunger", getHunger());
+        tag.putInt("lifespan", getLifeSpan());
         tag.putLong("priorityPos", this.entityData.get(PRIORITY_POS).asLong());
         super.addAdditionalSaveData(tag);
     }
