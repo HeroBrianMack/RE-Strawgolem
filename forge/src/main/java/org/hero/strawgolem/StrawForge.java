@@ -9,12 +9,11 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.eventbus.api.bus.BusGroup;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import org.hero.strawgolem.registry.EntityRegistry;
-import org.hero.strawgolem.registry.ParticleRegistry;
 
 @Mod(Constants.MODID)
 public class StrawForge {
@@ -28,7 +27,7 @@ public class StrawForge {
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(Registries.ITEM, Constants.MODID);
 
     public StrawForge(FMLJavaModLoadingContext context) {
-        final IEventBus modEventBus = context.getModEventBus();
+        final BusGroup modEventBus = context.getModBusGroup();
 
         SOUND_EVENTS.register(modEventBus);
         BLOCKS.register(modEventBus);
@@ -37,17 +36,7 @@ public class StrawForge {
         CREATIVE_TABS.register(modEventBus);
         ITEMS.register(modEventBus);
         PARTICLES.register(modEventBus);
-        modEventBus.<EntityAttributeCreationEvent>addListener(event -> EntityRegistry.registerEntityAttributes(event::put));
+        EntityAttributeCreationEvent.getBus(modEventBus).addListener(event -> EntityRegistry.registerEntityAttributes(event::put));
         CommonClass.init();
     }
-//    public Strawgolem() {
-//        // This method is invoked by the Forge mod loader when it is ready
-//        // to load your mod. You can access Forge and Common code in this
-//        // project.
-//
-//        // Use Forge to bootstrap the Common mod.
-//        Constants.LOG.info("Hello Forge world!");
-//        CommonClass.init();
-//
-//    }
 }

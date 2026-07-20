@@ -8,7 +8,7 @@ import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 import org.hero.strawgolem.client.StrawClient;
 import org.hero.strawgolem.registry.ParticleRegistry;
 
-@EventBusSubscriber(modid = Constants.MODID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = Constants.MODID, value = Dist.CLIENT)
 public final class StrawNeoClient {
     @SubscribeEvent
     public static void registerRenderers(final EntityRenderersEvent.RegisterRenderers event) {
