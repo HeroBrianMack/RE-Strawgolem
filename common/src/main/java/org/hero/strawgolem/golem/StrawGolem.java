@@ -272,6 +272,11 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
                 // Clears the winter model.
                 entityData.set(FESTIVE, false);
                 // Could drain durability here, but doesn't seem notable enough to do so.
+            } else {
+                // Unrecognized item: don't eat the click. Letting the interaction fall
+                // through gives the held item's own entity-interaction a turn (mob
+                // capture tools, the golem retrainer, etc.).
+                return InteractionResult.PASS;
             }
             // Mark the result as consumption.
             return InteractionResult.CONSUME;
@@ -518,6 +523,42 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
      * Gets the Block Position favored by the Straw Golem for delivering items.
      * @return The Block Position favored by the Straw Golem for delivering items.
      */
+    /**
+     * Whether livestock will try to eat this golem. Working golems that must stand
+     * among animals (e.g. the breeder) override this to false.
+     */
+    public boolean isEdibleGolem() {
+        return true;
+    }
+
+    /**
+     * Deposits a stack into the bound priority chest (working golems' "pockets");
+     * anything that does not fit is dropped at the golem's feet.
+     */
+    public void depositToChest(ItemStack stack) {
+        if (stack.isEmpty()) {
+            return;
+        }
+        BlockPos dest = getPriorityPos();
+        ItemStack remainder = stack;
+        if (!level().isClientSide && dest.getX() != Integer.MAX_VALUE) {
+            Container container = net.minecraft.world.level.block.entity.HopperBlockEntity.getContainerAt(level(), dest);
+            if (container != null) {
+                remainder = deliverer.insertIntoContainer(container, stack);
+            } else {
+                remainder = org.hero.strawgolem.platform.Services.PLATFORM.insertItem(level(), dest, stack);
+            }
+        }
+        if (!remainder.isEmpty()) {
+            spawnAtLocation(remainder);
+        }
+    }
+
+    /** Puts the little straw hat on (or takes it off). Used by profession hats. */
+    public void setHat(boolean hasHat) {
+        entityData.set(HAT, hasHat);
+    }
+
     public BlockPos getPriorityPos() {
         return entityData.get(PRIORITY_POS);
     }
@@ -686,30 +727,51 @@ public class StrawGolem extends AbstractGolem implements GeoAnimatable {
 
         public void deliver(LevelReader level, BlockPos pos) {
             ItemStack item = StrawGolem.this.getMainHandItem();
-            if (!item.isEmpty() && ContainerHelper.isContainer(level, pos)) {
-                if (level.getBlockEntity(pos) instanceof Container container) {
-                    for (int i = 0; i < container.getContainerSize(); i++) {
-                        ItemStack cItem = container.getItem(i);
-                        if (cItem.is(item.getItem()) && container.getMaxStackSize(cItem) > cItem.getCount()) {
-                            cItem.grow(item.getCount());
-                            container.setItem(i, cItem);
-                            StrawGolem.this.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
-                            return;
-                        }
-                    }
-                    for (int i = 0; i < container.getContainerSize(); i++) {
-                        ItemStack cItem = container.getItem(i);
-                        if (cItem.isEmpty() && container.getMaxStackSize() > cItem.getCount()) {
-                            container.setItem(i, item);
-                            StrawGolem.this.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
-                            return;
-                        }
-                    }
-                }
+            if (item.isEmpty()) {
+                return;
+            }
+            // Resolve a vanilla Container; HopperBlockEntity.getContainerAt merges double chests.
+            Container container = null;
+            if (level instanceof net.minecraft.world.level.Level lvl) {
+                container = net.minecraft.world.level.block.entity.HopperBlockEntity.getContainerAt(lvl, pos);
+            } else if (level.getBlockEntity(pos) instanceof Container c) {
+                container = c;
+            }
+            if (container != null) {
+                StrawGolem.this.setItemSlot(EquipmentSlot.MAINHAND, insertIntoContainer(container, item));
+                return;
+            }
+            // Platform inventories (e.g. NeoForge item handler capability - modded storage).
+            ItemStack remainder = org.hero.strawgolem.platform.Services.PLATFORM.insertItem(level, pos, item);
+            if (remainder.getCount() != item.getCount()) {
+                StrawGolem.this.setItemSlot(EquipmentSlot.MAINHAND, remainder);
             } else {
                 // Should in theory never trigger
                 LOG.error("Delivery location is not a container! {} {}", item.isEmpty(), ContainerHelper.isContainer(level, pos));
             }
+        }
+
+        public ItemStack insertIntoContainer(Container container, ItemStack stack) {
+            stack = stack.copy();
+            for (int i = 0; i < container.getContainerSize() && !stack.isEmpty(); i++) {
+                ItemStack cItem = container.getItem(i);
+                if (!cItem.isEmpty() && ItemStack.isSameItemSameComponents(cItem, stack)) {
+                    int limit = Math.min(container.getMaxStackSize(), cItem.getMaxStackSize());
+                    int move = Math.min(stack.getCount(), limit - cItem.getCount());
+                    if (move > 0) {
+                        cItem.grow(move);
+                        stack.shrink(move);
+                        container.setItem(i, cItem);
+                    }
+                }
+            }
+            for (int i = 0; i < container.getContainerSize() && !stack.isEmpty(); i++) {
+                if (container.getItem(i).isEmpty()) {
+                    int limit = Math.min(container.getMaxStackSize(), stack.getMaxStackSize());
+                    container.setItem(i, stack.split(limit));
+                }
+            }
+            return stack;
         }
 
     }

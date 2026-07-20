@@ -113,7 +113,7 @@ public class GolemDepositGoal extends GolemMoveToBlockGoal {
     @Override
     protected boolean isValidTarget(LevelReader levelReader, BlockPos blockPos) {
         // Not sure which way is more efficient, or if the order even matters...
-        return levelReader.getBlockEntity(blockPos) instanceof Container && VisionHelper.canSee(mob, mob.getOnPos());
+        return ContainerHelper.isContainer(levelReader, blockPos) && VisionHelper.canSee(mob, mob.getOnPos());
     }
 
 }

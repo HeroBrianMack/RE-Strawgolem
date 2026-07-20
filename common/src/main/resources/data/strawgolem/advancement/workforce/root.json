@@ -1,0 +1,35 @@
+{
+  "display": {
+    "icon": {
+      "id": "strawgolem:straw_hat"
+    },
+    "title": {
+      "translate": "advancement.strawgolem.workforce.root.title"
+    },
+    "description": {
+      "translate": "advancement.strawgolem.workforce.root.desc"
+    },
+    "background": "minecraft:textures/block/hay_block_side.png",
+    "show_toast": false,
+    "announce_to_chat": false
+  },
+  "criteria": {
+    "present": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "strawgolem:breeder_golem_spawn_egg",
+              "strawgolem:stock_golem_spawn_egg",
+              "strawgolem:miner_golem_spawn_egg",
+              "strawgolem:beekeeper_golem_spawn_egg",
+              "strawgolem:golem_retrainer",
+              "strawgolem:straw_hat"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

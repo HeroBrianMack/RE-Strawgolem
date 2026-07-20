@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "strawgolem:item/lumberjack_hat"
+  }
+}

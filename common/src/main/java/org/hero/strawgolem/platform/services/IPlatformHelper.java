@@ -61,4 +61,36 @@ public interface IPlatformHelper {
     <T extends ParticleOptions> Supplier<ParticleType<T>> registerParticle(String id, Supplier<ParticleType<T>> particle);
     <E extends Mob> Supplier<SpawnEggItem> makeSpawnEggFor(Supplier<EntityType<E>> entityType, int primaryEggColour, int secondaryEggColour, Item.Properties itemProperties);
     CreativeModeTab.Builder newCreativeTabBuilder();
+
+    /**
+     * Checks whether the block at pos exposes a platform-specific item inventory
+     * (e.g. a NeoForge IItemHandler capability) even if it is not a vanilla Container.
+     * Lets golems deliver to modded storage such as Sophisticated Storage.
+     */
+    default boolean isItemReceiver(net.minecraft.world.level.LevelReader level, net.minecraft.core.BlockPos pos) {
+        return false;
+    }
+
+    /**
+     * Inserts into a platform-specific item inventory at pos. Returns the remainder.
+     */
+    default net.minecraft.world.item.ItemStack insertItem(net.minecraft.world.level.LevelReader level, net.minecraft.core.BlockPos pos, net.minecraft.world.item.ItemStack stack) {
+        return stack;
+    }
+
+    /**
+     * Simulates inserting into a platform-specific item inventory at pos.
+     * Returns the remainder that would not fit. Default: nothing fits.
+     */
+    default net.minecraft.world.item.ItemStack insertItemSimulate(net.minecraft.world.level.LevelReader level, net.minecraft.core.BlockPos pos, net.minecraft.world.item.ItemStack stack) {
+        return stack;
+    }
+
+    /**
+     * Extracts up to maxCount items matching the predicate from a platform-specific
+     * item inventory at pos. Simulate=true only peeks. Returns EMPTY when nothing matches.
+     */
+    default net.minecraft.world.item.ItemStack extractMatching(net.minecraft.world.level.LevelReader level, net.minecraft.core.BlockPos pos, java.util.function.Predicate<net.minecraft.world.item.ItemStack> predicate, int maxCount, boolean simulate) {
+        return net.minecraft.world.item.ItemStack.EMPTY;
+    }
 }

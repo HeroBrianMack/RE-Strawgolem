@@ -34,11 +34,24 @@ public class MixinServerPlayerMode {
         BlockPos blockPos = pHitResult.getBlockPos();
         BlockEntity blockEntity = pLevel.getBlockEntity(blockPos);
 
-        // Confirm block is container
-        if (blockEntity instanceof Container) {
+        // Confirm block is container (including capability inventories like modded storage)
+        if (org.hero.strawgolem.golem.api.ContainerHelper.isContainer(pLevel, blockPos)) {
             if (((Object) pPlayer) instanceof GolemOrderer orderer) {
                 StrawGolem golem = orderer.strawgolemRewrite$getGolem();
                 if (golem != null && golem.isAlive()) {
+                    // Stock golems bind two containers: first click = source, second = destination.
+                    if (golem instanceof org.hero.strawgolem.golem.StockGolem stockBind && !stockBind.isAwaitingDestination()) {
+                        stockBind.setSourcePos(blockPos);
+                        stockBind.setAwaitingDestination(true);
+                        pPlayer.displayClientMessage(Component.translatable(
+                                "strawgolem.ordering.source"), true);
+                        cir.setReturnValue(InteractionResult.SUCCESS);
+                        cir.cancel();
+                        return; // keep the golem selected for the destination click
+                    }
+                    if (golem instanceof org.hero.strawgolem.golem.StockGolem stockDone) {
+                        stockDone.setAwaitingDestination(false);
+                    }
                     golem.setPriorityPos(blockPos);
                     pPlayer.displayClientMessage(Component.translatable(
                             "strawgolem.ordering.complete"), true);

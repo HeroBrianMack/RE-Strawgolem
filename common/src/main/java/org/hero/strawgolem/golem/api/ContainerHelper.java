@@ -7,7 +7,8 @@ import net.minecraft.world.level.LevelReader;
 
 public class ContainerHelper {
     public static boolean isContainer(LevelReader levelReader, BlockPos pos) {
-        return pos != null && levelReader.getBlockEntity(pos) instanceof Container;
+        return pos != null && (levelReader.getBlockEntity(pos) instanceof Container
+                || org.hero.strawgolem.platform.Services.PLATFORM.isItemReceiver(levelReader, pos));
     }
 
     public static boolean isContainer(Mob mob, BlockPos pos) {

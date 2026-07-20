@@ -1,0 +1,28 @@
+{
+  "parent": "strawgolem:workforce/root",
+  "display": {
+    "icon": {
+      "id": "strawgolem:golem_retrainer"
+    },
+    "title": {
+      "translate": "advancement.strawgolem.workforce.hr.title"
+    },
+    "description": {
+      "translate": "advancement.strawgolem.workforce.hr.desc"
+    }
+  },
+  "criteria": {
+    "stick": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "strawgolem:golem_retrainer"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

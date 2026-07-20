@@ -25,7 +25,7 @@ public class MixinCow extends Mob {
         if (Constants.Golem.animalAggro) {
             this.goalSelector.addGoal(5, new ConsumeGolemGoal((Cow)(Object)this, true));
             this.targetSelector.addGoal(5, // Check if <> breaks anything, it shouldn't in theory
-                    new NearestAttackableTargetGoal<>((Cow)(Object)this, StrawGolem.class, true));
+                    new NearestAttackableTargetGoal<>((Cow)(Object)this, StrawGolem.class, 10, true, false, (e) -> e instanceof StrawGolem golem && golem.isEdibleGolem()));
         }
     }
 }

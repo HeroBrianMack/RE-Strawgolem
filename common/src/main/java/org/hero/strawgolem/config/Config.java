@@ -56,6 +56,7 @@ public class Config {
         // The sections of the config.
         golemHealthSection();
         golemMovementSection();
+        golemBreederSection();
         golemHarvestingSection();
         miscSection();
         metaSection();
@@ -95,6 +96,14 @@ public class Config {
     }
 
     /**
+     * Method that handles the Breeder Golem Section of the Config.
+     */
+    private void golemBreederSection() {
+        section("Breeder Golem");
+        add("Breeder Population Cap", 10, "Maximum number of animals of each species (counted per species, babies included) that may exist in a breeder golem's working range before it stops breeding that species. Prevents runaway pens.");
+    }
+
+    /**
      * Method that handles the Golem Movement Section of the Config.
      */
     private void golemMovementSection() {
@@ -104,6 +113,7 @@ public class Config {
         add("Run Speed", 0.8,
                 "The run speed of a golem.");
         add("Wander Range", 24, "How far a golem can wander");
+        add("Idle Tether Range", 12, "Golems bound to a container (via ordering) stay within this radius of it while idling, and walk back when outside it.");
         add("Panic", true,
                 "Whether a golem should panic when threatened.");
         add("Flee Range", 15.0f, "How far a golem can flee");

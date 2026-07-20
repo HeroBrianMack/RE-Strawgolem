@@ -95,4 +95,50 @@ public class NeoForgePlatformHelper implements IPlatformHelper {
     public CreativeModeTab.Builder newCreativeTabBuilder() {
         return CreativeModeTab.builder();
     }
+
+    @Override
+    public boolean isItemReceiver(net.minecraft.world.level.LevelReader level, net.minecraft.core.BlockPos pos) {
+        return level instanceof net.minecraft.world.level.Level lvl
+                && lvl.getCapability(net.neoforged.neoforge.capabilities.Capabilities.ItemHandler.BLOCK, pos, null) != null;
+    }
+
+    @Override
+    public net.minecraft.world.item.ItemStack insertItem(net.minecraft.world.level.LevelReader level, net.minecraft.core.BlockPos pos, net.minecraft.world.item.ItemStack stack) {
+        if (level instanceof net.minecraft.world.level.Level lvl) {
+            var handler = lvl.getCapability(net.neoforged.neoforge.capabilities.Capabilities.ItemHandler.BLOCK, pos, null);
+            if (handler != null) {
+                return net.neoforged.neoforge.items.ItemHandlerHelper.insertItemStacked(handler, stack.copy(), false);
+            }
+        }
+        return stack;
+    }
+
+    @Override
+    public net.minecraft.world.item.ItemStack insertItemSimulate(net.minecraft.world.level.LevelReader level, net.minecraft.core.BlockPos pos, net.minecraft.world.item.ItemStack stack) {
+        if (level instanceof net.minecraft.world.level.Level lvl) {
+            var handler = lvl.getCapability(net.neoforged.neoforge.capabilities.Capabilities.ItemHandler.BLOCK, pos, null);
+            if (handler != null) {
+                return net.neoforged.neoforge.items.ItemHandlerHelper.insertItemStacked(handler, stack.copy(), true);
+            }
+        }
+        return stack;
+    }
+
+    @Override
+    public net.minecraft.world.item.ItemStack extractMatching(net.minecraft.world.level.LevelReader level, net.minecraft.core.BlockPos pos, java.util.function.Predicate<net.minecraft.world.item.ItemStack> predicate, int maxCount, boolean simulate) {
+        if (level instanceof net.minecraft.world.level.Level lvl) {
+            var handler = lvl.getCapability(net.neoforged.neoforge.capabilities.Capabilities.ItemHandler.BLOCK, pos, null);
+            if (handler != null) {
+                for (int slot = 0; slot < handler.getSlots(); slot++) {
+                    if (predicate.test(handler.getStackInSlot(slot))) {
+                        net.minecraft.world.item.ItemStack got = handler.extractItem(slot, maxCount, simulate);
+                        if (!got.isEmpty()) {
+                            return got;
+                        }
+                    }
+                }
+            }
+        }
+        return net.minecraft.world.item.ItemStack.EMPTY;
+    }
 }

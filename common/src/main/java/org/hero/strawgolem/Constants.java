@@ -40,10 +40,12 @@ public class Constants {
         public static final double defaultWalkSpeed = CONFIG.getDouble("Walk Speed");
         public static final double defaultRunSpeed = CONFIG.getDouble("Run Speed");
         public static final int wanderRange = CONFIG.getInt("Wander Range");;
+        public static final int tetherRange = CONFIG.getInt("Idle Tether Range");
         public static final boolean panic = CONFIG.getBool("Panic");
         public static final float fleeRange = CONFIG.getFloat("Flee Range");
         // Harvesting
         public static final int searchRange = CONFIG.getInt("Harvest Range");
+        public static final int breederPopulationCap = CONFIG.getInt("Breeder Population Cap");
         public static final int searchRangeVertical = 3;
         public static final double depositDistance = 1.5;
         public static final boolean blockHarvest = CONFIG.getBool("Block Harvesting");
